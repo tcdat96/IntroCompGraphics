@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<style type="text/css">
+	.partContainer {
+		display: flex; 
+		border:1px solid #d3d3d3;
+		padding: 16px;
+		margin-right: 16px;
+	}
+
+	.textContainer {
+		display: flex;
+		flex-direction: row;
+	}
+
+	.slider {
+		-webkit-appearance: none;
+		width: auto;
+		height: 15px;
+		border-radius: 5px;  
+		background: #d3d3d3;
+		outline: none;
+		opacity: 0.7;
+		-webkit-transition: .2s;
+		transition: opacity .2s;
+	}
+	.slider::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 25px;
+		height: 25px;
+		border-radius: 50%; 
+		background: #4CAF50;
+		cursor: pointer;
+	}
+	.slider::-moz-range-thumb {
+		width: 25px;
+		height: 25px;
+		border-radius: 50%;
+		background: #4CAF50;
+		cursor: pointer;
+	}
+</style>
+<body>
+<div style="display: flex; flex-direction: column">
+	<div style="display: flex; flex-direction: row;">
+		<div class="partContainer" style="flex-direction: column;">
+			<h1>Part 1</h1>
+			<canvas id="part1" width="300" height="330">Your browser does not support the HTML5 canvas tag.</canvas>
+		</div>
+
+		<div class="partContainer" style="flex-direction: row; width: 100%; height: 100vh;">
+			<div style="display: flex; flex-direction: column; min-width: 20%;">
+				<h1>Part 2</h1>
+				<div class="textContainer">
+					<b>Line segments: &nbsp;</b>
+					<b id="lineSegmentValue"></b>
+				</div>
+				<div class="textContainer">
+					<p>Control points: &nbsp;</p>
+					<p id="cpValue"></p>
+				</div>
+			  	<input type="range" min="3" max="200" value="100" id="cpSlider" class="slider">
+				<div class="textContainer">
+					<p>Subdivision: &nbsp;</p>
+					<p id="subdivValue"></p>
+				</div>
+			  	<input type="range" min="0" max="8" value="0" id="sdSlider" class="slider">
+			</div>
+			<div style="width: 100%; height: 100%;">
+				<canvas id="part2" width="300" height="330">Your browser does not support the HTML5 canvas tag.</canvas>
+			</div>
+		</div>
+	</div>
+	<div class="partContainer" style="width: 100%; height: 100vh; margin-top: 16px;">
+		<canvas id="l-systems" width="300" height="330">Your browser does not support the HTML5 canvas tag.</canvas>
+	</div>
+</div>
+<script>
+	// -------------------- part 1 --------------------
+	var polygons=[[[{x:547,y:581},{x:575,y:457},{x:551,y:461}],[{x:575,y:455},{x:613,y:301},{x:555,y:289},{x:549,y:447}],[{x:613,y:299},{x:683,y:1},{x:561,y:87},{x:555,y:279}]],[[{x:535,y:635},{x:537,y:469},{x:507,y:503}],[{x:537,y:454},{x:535,y:290},{x:467,y:315},{x:504,y:480}],[{x:534,y:278},{x:532,y:42},{x:432,y:157},{x:463,y:297}]],[[{x:551,y:722},{x:498,y:521},{x:476,y:571}],[{x:465,y:549},{x:492,y:498},{x:448,y:331},{x:392,y:402}],[{x:381,y:381},{x:443,y:311},{x:398,y:141},{x:330,y:276}]],[[{x:582,y:807},{x:468,y:601},{x:465,y:669}],[{x:448,y:650},{x:456,y:579},{x:377,y:432},{x:348,y:534}],[{x:332,y:513},{x:361,y:411},{x:292,y:279},{x:258,y:428}]],[[{x:636,y:884},{x:469,y:704},{x:487,y:778}],[{x:470,y:764},{x:450,y:684},{x:349,y:573},{x:369,y:693}],[{x:343,y:675},{x:327,y:551},{x:227,y:441},{x:230,y:595}]],[[{x:707,y:945},{x:501,y:811},{x:533,y:877}],[{x:521,y:873},{x:483,y:800},{x:384,y:734},{x:434,y:838}],[{x:419,y:831},{x:358,y:718},{x:204,y:616},{x:243,y:763}]],]
+	var mixedShapes={lines: [{x:933,y:989},{x:871,y:997},{x:820,y:994},{x:549,y:902},{x:584,y:956},{x:540,y:899},{x:457,y:871},{x:511,y:944},{x:443,y:866},{x:224,y:790},{x:315,y:955},{x:0,y:1035}],curve:{sx:0,sy:1035,cp1x:700,cp1y:900,cp2x:700,cp2y:1100,ex:933,ey:989}};
+	var colors = ["#0D47A1","#1565C0","#1976D2","#1E88E5","#2196F3","#42A5F5","#64B5F6","#90CAF9","#BBDEFB"];
+	var colorIdx = 0;
+
+	var c = document.getElementById("part1");
+	var ctx = c.getContext("2d");
+	ctx.scale(0.3,0.3);
+
+	// polygons
+	for (var i = 0; i < polygons.length; i++) {
+		ctx.beginPath();
+		for (var j = 0; j < polygons[i].length; j++) {
+			var poly = polygons[i][j];
+			ctx.moveTo(poly[0].x, poly[0].y);
+			for (var k = 1; k < poly.length; k++) {
+				ctx.lineTo(poly[k].x, poly[k].y);
+			}
+		}
+		ctx.closePath();
+		ctx.fillStyle = colors[colorIdx++];
+		ctx.fill();
+	}
+
+	// last shape
+	var lines = mixedShapes.lines;
+	ctx.moveTo(lines[0].x, lines[0].y);
+	for (var k = 0; k < lines.length - 1; k++) {
+		ctx.lineTo(lines[k + 1].x, lines[k + 1].y);
+	}
+	var curve = mixedShapes.curve;
+	ctx.bezierCurveTo(curve.cp1x, curve.cp1y, curve.cp2x, curve.cp2y, curve.ex, curve.ey);
+	ctx.closePath();
+	ctx.fillStyle = colors[colorIdx++];
+	ctx.fill();
+	// ------------------ end part 1 ------------------
+
+
+
+	// -------------------- part 2 --------------------
+
+	var c1 = document.getElementById("part2");
+	var ctx1 = c1.getContext("2d");
+	c1.width = c1.parentElement.offsetWidth;
+	c1.height = c1.parentElement.offsetHeight;
+
+	var lineSegmentValue = document.getElementById("lineSegmentValue");
+
+	var cpSlider = document.getElementById("cpSlider");
+	var cpValue = document.getElementById("cpValue");
+	// Update the current slider value (each time you drag the slider handle)
+	cpSlider.oninput = function() {
+	  cpValue.innerHTML = this.value;
+	  triggerDrawCircle()
+	}
+
+	var sdSlider = document.getElementById("sdSlider");
+	var subdivValue = document.getElementById("subdivValue");
+	// Update the current slider value (each time you drag the slider handle)
+	sdSlider.oninput = function() {
+	  subdivValue.innerHTML = this.value;
+	  drawCircle()
+	}
+
+	var cx = c1.width / 2;
+	var cy = c1.height / 2;
+	var radius = cx / 2;
+
+	var points = []
+
+	cpValue.innerHTML = cpSlider.value;
+	subdivValue.innerHTML = sdSlider.value;
+	triggerDrawCircle()
+
+	registerMouseEvents()
+
+	function registerMouseEvents() {
+		var pointIdx = -1;
+
+		function mouseEvents(e) {
+			switch (e.type) {
+				case "mousedown":
+					var smallestDistance = Number.MAX_SAFE_INTEGER;
+					for (var i = 0, nearby = 0; i < points.length; i++) {
+						var d = Math.pow(points[i].x - e.offsetX, 2) + Math.pow(points[i].y - e.offsetY, 2);
+						if (d < 100 && d < smallestDistance) {
+							pointIdx = i;
+							smallestDistance = d;
+							if (++nearby >= 10) {
+								break;
+							}
+						}
+					}
+					break;
+				case "mouseup":
+				case "mouseout":
+					pointIdx = -1;
+					break;
+				case "mousemove":
+					if (e.offsetX >= 0 && e.offsetX < c1.width && e.offsetY >= 0 && e.offsetY < c1.height) {
+						if (pointIdx >= 0 && pointIdx < points.length) {
+							points[pointIdx] = {x: e.offsetX, y: e.offsetY};
+							drawCircle();
+						}
+					}
+					break;
+			}
+		}
+		["down","up","move","out"].forEach(name => document.addEventListener("mouse" + name, mouseEvents));
+	}
+
+	function triggerDrawCircle() {
+		points = initControlPoints();
+		drawCircle()
+	}
+
+	function initControlPoints() {
+		var cpCount = cpSlider.value;
+
+		var points = [];
+		for (var i = 0; i < cpCount; i++) {
+			points[i] = {
+				x: cx + radius * Math.cos(Math.PI * 2 * i / cpCount),
+				y: cy + radius * Math.sin(Math.PI * 2 * i / cpCount)
+			}
+		}
+		return points
+	}
+
+	function drawCircle() {
+		ctx1.clearRect(0, 0, c1.width, c1.height);
+
+		var newPoints = computeSubdivision(points);
+		lineSegmentValue.innerHTML = newPoints.length;
+
+		ctx1.beginPath();
+		ctx1.moveTo(newPoints[0].x, newPoints[0].y);
+		for (var i = 1; i < newPoints.length; i++) {
+			ctx1.lineTo(newPoints[i].x, newPoints[i].y);
+		}
+		ctx1.closePath();
+
+		var gradient = ctx1.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
+		var colors = ["tomato","orange","dodgerblue","MediumSeaGreen","SlateBlue","Violet"];
+		for (var i = 0; i < colors.length; i++) {
+			gradient.addColorStop(i / colors.length, colors[i]);
+		}
+		ctx1.strokeStyle = gradient;
+		ctx1.lineWidth = 5;
+		ctx1.stroke()
+
+		var cpRadius = 5;
+		for (var i = 0; i < points.length; i++) {
+			ctx1.fillRect(points[i].x - cpRadius / 2, points[i].y - cpRadius / 2, cpRadius, cpRadius);
+		}
+	}
+
+	function computeSubdivision(cps) {
+		var sdCount = sdSlider.value;
+		cps = cps.slice(0);							// copy array
+		for (var i = 0; i < sdCount; i++) {
+			cps[cps.length] = cps[0]
+			// Chaikin’s algorithm
+			for (var j = cps.length - 2; j >= 0; j--) {
+				cps[j * 2 + 1] = {
+					x: (cps[j].x + 3 * cps[j + 1].x) / 4, 
+					y: (cps[j].y + 3 * cps[j + 1].y) / 4 
+				}
+				cps[j * 2] = {
+					x: (3 * cps[j].x + cps[j + 1].x) / 4, 
+					y: (3 * cps[j].y + cps[j + 1].y) / 4
+				};
+			}
+		}
+		return cps;
+	}
+
+
+	// ------------------ L-systems -------------------
+	var c2 = document.getElementById("l-systems");
+	ctx2 = c2.getContext("2d");
+	c2.width = c2.parentElement.offsetWidth;
+	c2.height = c2.parentElement.offsetHeight;
+
+	drawLindenmayer(lindenmayer("F", ["F", "F[+F]F[-F]F"], 8), {x:c2.width/4,y:c2.height}, 5, Math.PI / 7);
+	drawLindenmayer(lindenmayer("F", ["F", "FF+[+F-F-F]-[-F+F+F]"], 5), {x:3*c2.width/4,y:c2.height}, 5, Math.PI / 7.2);
+
+	function lindenmayer(axiom, rules, lsLoop) {
+		for (var i = 0; i < lsLoop; i++) {
+			axiom = axiom.replace(new RegExp(rules[0], 'g'), rules[1]);
+		}
+		return axiom
+	}
+
+	function drawLindenmayer(commands, curPos, step, angle) {
+		var curAngle = Math.PI / 2;
+		var stack = []
+		ctx2.moveTo(curPos.x, curPos.y);
+
+		for (var i = 0; i < commands.length; i++) {
+			var command = commands.charAt(i);
+			switch (command) {
+				case 'F':
+				case 'G': 
+					curPos = {
+						x: curPos.x + step * Math.cos(curAngle),
+						y: curPos.y - step * Math.sin(curAngle)
+					};
+					if (command == 'F')
+						ctx2.lineTo(curPos.x, curPos.y);
+					else
+						ctx2.moveTo(curPos.x, curPos.y);
+					break;
+				case '+':
+					curAngle += angle;
+					break;
+				case '-':
+					curAngle -= angle;
+					break;
+				case '[':
+					stack.push({pos: curPos, angle: curAngle});
+					break;
+				case "]":
+					state = stack.pop();
+					curPos = state.pos;
+					curAngle = state.angle;
+					ctx.moveTo(curPos.x, curPos.y);
+					break;
+			}
+		}
+		ctx2.stroke();
+	}
+
+	// ---------------- end L-systems -----------------
+
+	// ------------------ end part 2 ------------------
+
+</script> 
+
+</body>
+</html>

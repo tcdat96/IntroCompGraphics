@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <vector>
+#include "utils.h"
 
 // Include GLM
 #include <glm/glm.hpp>
@@ -17,8 +18,8 @@ class Solid {
 protected:
 	GLuint mIBO = 0;
 	std::vector<unsigned int> mIndices;
+	GLfloat mColor[3] = { 1, 0, 0 };
 
-	GLuint mMvpLocation = 0;
 	glm::vec3 mCamera = glm::vec3(5, 2, 5);
 
 	float mAngle = 0;
@@ -34,6 +35,9 @@ protected:
 	std::vector<unsigned int> triangulate(std::vector<unsigned int> indices, int vpf);
 
 public:
+	static GLint sMvpLocation;
+	static GLint sColorLocation;
+
 	Solid() {}
 	Solid(std::vector<unsigned int> indices, int vpf = 3);
 	~Solid();
@@ -42,9 +46,6 @@ public:
 		return mIndices;
 	}
 
-	void setMvpLocation(GLuint location) {
-		mMvpLocation = location;
-	}
 	void setProjectionMatrix(glm::mat4 projection) {
 		mVP = projection * mView;
 	}

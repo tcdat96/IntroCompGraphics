@@ -97,31 +97,30 @@ void setUpShaders() {
 	gVertexProgram = initShaders(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
 	glUseProgram(gVertexProgram);
 
+	// position attribute
 	GLint vPosition = glGetAttribLocation(gVertexProgram, "vPosition");
 	glEnableVertexAttribArray(vPosition);
 	glBindBuffer(GL_ARRAY_BUFFER, gObjectManager->getVbo());
 	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-	GLint vColor = glGetAttribLocation(gVertexProgram, "vColor");
-	glEnableVertexAttribArray(vColor);
-	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, (void*)gObjectManager->getColorPtr());
-
-	// wireframe shader
-	gWireframeProgram = initShaders(WIREFRAME_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
-	glUseProgram(gWireframeProgram);
-	GLint wColor = glGetUniformLocation(gWireframeProgram, "wColor");
-	if (wColor != -1) {
-		glUniform3f(wColor, 1, 1, 1);
+	// color attribute
+	GLint vColor = glGetUniformLocation(gVertexProgram, "vColor");
+	if (vColor < 0) {
+		std::cerr << "couldn't find vColor in shader\n";
+		exit(0);
 	}
+	gObjectManager->setColorLocation(vColor);
 
 	// MVP location
-	glUseProgram(gVertexProgram);
 	GLint mvpLocation = glGetUniformLocation(gVertexProgram, "MVP");
 	if (mvpLocation < 0) {
 		std::cerr << "couldn't find MVP in shader\n";
 		exit(0);
 	}
 	gObjectManager->setMvpLocation(mvpLocation);
+
+	// wireframe shader
+	gWireframeProgram = initShaders(WIREFRAME_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
 }
 
 void renderWorld() { 

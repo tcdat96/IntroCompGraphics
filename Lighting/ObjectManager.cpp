@@ -3,8 +3,8 @@
 glm::mat4 ObjectManager::sVP = glm::mat4(1);
 
 ObjectManager::ObjectManager() {
-	float phi = (1 + sqrt(5)) / 2;
-	float iphi = 1.0 / phi;
+	float phi = (1 + (float)sqrt(5)) / 2;
+	float iphi = 1.0f / phi;
 	vPositions = {
 		// cube
 		// tetrahedron 
@@ -87,60 +87,13 @@ ObjectManager::ObjectManager() {
 		4,4,8
 	};
 
-	generateColors();
-
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	int bufferSize = getBufferSize();
 	glBufferData(GL_ARRAY_BUFFER, bufferSize * 2, NULL, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSize, &vPositions[0]);
-	glBufferSubData(GL_ARRAY_BUFFER, bufferSize, bufferSize, &vColors[0]);
 
 	generateObjects();
-}
-
-void ObjectManager::generateColors()
-{
-	vColors.clear();
-	vColors.resize(vPositions.size());
-
-	for (int i = 0; i <= 7; i++) {
-		vColors[i * 3] = rand(0.25, 1);
-	}
-
-	for (int i = 8; i <= 13; i++) {
-		vColors[i * 3 + 1] = rand(0.25, 1);
-	}
-
-	for (int i = 14; i <= 25; i++) {
-		vColors[i * 3 + 2] = rand(0.25, 1);
-	}
-
-	for (int i = 26; i <= 37; i++) {
-		vColors[i * 3] = rand(0.25, 1);
-	}
-
-	// house
-	for (int i = 38 * 3; i < vPositions.size(); i++) {
-		vColors[i] = 0.75;
-	}
-
-	setVertexColor(46, 1, 0, 0);
-	setVertexColor(47, 1, 0, 0);
-	setVertexColor(56, 1, 0, 0);
-	setVertexColor(57, 1, 0, 0);
-
-	for (int i = 58; i <= 72; i++) {
-		setVertexColor(i, 0, 1, 0);
-	}
-}
-
-void ObjectManager::setVertexColor(int index, int r, int g, int b)
-{
-	int offset = index * 3;
-	vColors[offset] = r;
-	vColors[offset + 1] = g;
-	vColors[offset + 2] = b;
 }
 
 void ObjectManager::generateObjects()
@@ -216,7 +169,7 @@ void ObjectManager::generateObjects()
 	mObjects.push_back(cube);
 
 	// initial translation
-	for (int i = 1; i < mObjects.size(); i++) {
+	for (unsigned int i = 1; i < mObjects.size(); i++) {
 		mObjects[i]->setInitialTransX(TRANSLATE_DELTA * 2 + TRANSLATE_DELTA * i);
 	}
 }
@@ -227,8 +180,10 @@ int ObjectManager::getBufferSize() {
 	return vPositions.size() * sizeof(GLfloat);
 }
 
-void ObjectManager::setViewIndex(int index) {
-	mViewIndex = index > 0 && index <= mObjects.size() + 1 ? index : mViewIndex;
+void ObjectManager::setViewIndex(unsigned int index) {
+	if (index > 0 && index <= mObjects.size() + 1 && index != mViewIndex) {
+		mViewIndex = index;
+	}
 }
 
 void ObjectManager::setProjectionMatrix(glm::mat4 projection) {
@@ -240,12 +195,6 @@ void ObjectManager::setProjectionMatrix(glm::mat4 projection) {
 	sVP = projection * view;
 	for (auto it = mObjects.begin(); it != mObjects.end(); it++) {
 		(*it)->setProjectionMatrix(projection);
-	}
-}
-
-void ObjectManager::setMvpLocation(GLuint location) {
-	for (auto it = mObjects.begin(); it != mObjects.end(); it++) {
-		(*it)->setMvpLocation(location);
 	}
 }
 

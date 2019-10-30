@@ -4,17 +4,16 @@
 #include <set>
 
 #include "utils.h"
-#include "Solid.h"
 #include "MyHouse.h"
 
-constexpr unsigned int TRANSLATE_DELTA = 6;
+constexpr float TRANSLATE_DELTA = 6;
+
 
 class ObjectManager {
 private:
 	static glm::mat4 sVP;
 
 	std::vector<GLfloat> vPositions;
-	std::vector<GLfloat> vColors;
 	std::vector<Solid*> mObjects;
 
 	GLuint VBO;
@@ -31,10 +30,6 @@ private:
 			delete obj;
 		}
 	}
-	
-	void generateColors();
-
-	void setVertexColor(int index, int r, int g, int b);
 
 	void generateObjects();
 
@@ -57,11 +52,17 @@ public:
 		return getBufferSize();
 	}
 
-	void setViewIndex(int index);
+	void setViewIndex(unsigned int index);
 
 	void setProjectionMatrix(glm::mat4 projection);
 
-	void setMvpLocation(GLuint location);
+	void setColorLocation(GLuint location) {
+		Solid::sColorLocation = location;
+	}
+
+	void setMvpLocation(GLuint location) {
+		Solid::sMvpLocation = location;
+	}
 
 	void toggleRotation() {
 		mRotation = !mRotation;

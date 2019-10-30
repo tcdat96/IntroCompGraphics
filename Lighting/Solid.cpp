@@ -1,5 +1,8 @@
 #include "Solid.h"
 
+GLint Solid::sMvpLocation = 1;
+GLint Solid::sColorLocation = 2;
+
 Solid::~Solid()
 {
 	
@@ -12,13 +15,17 @@ Solid::Solid(std::vector<unsigned int> indices, int vpf)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(unsigned int), &mIndices[0], GL_STATIC_DRAW);
 
+	mColor[0] = rand(0, 1);
+	mColor[1] = rand(0, 1);
+	mColor[2] = rand(0, 1);
+
 	setPointOfInterest();
 }
 
 std::vector<unsigned int> Solid::triangulate(std::vector<unsigned int> indices, int vpf)
 {
 	std::vector<unsigned int> result;
-	for (int i = 0; i < indices.size(); i += vpf) {
+	for (unsigned int i = 0; i < indices.size(); i += vpf) {
 		for (int j = 1; j < vpf - 1; j++) {
 			result.push_back(indices[i]);
 			result.push_back(indices[i + j]);
@@ -40,7 +47,7 @@ void Solid::setMvp(mat4 vp, bool rotation)
 {
 	if (rotation) {
 		if (mAngle > M_PI * 2) mAngle = 0;
-		else mAngle += 0.001;
+		else mAngle += 0.001f;
 	}
 
 	mModel = mTranslateX == 0 ? mat4(1) : glm::translate(mat4(1), vec3(mTranslateX, 0, 0));
@@ -49,7 +56,9 @@ void Solid::setMvp(mat4 vp, bool rotation)
 	}
 
 	auto mvp = vp * mModel;
-	glUniformMatrix4fv(mMvpLocation, 1, GL_FALSE, glm::value_ptr(mvp));
+	glUniformMatrix4fv(sMvpLocation, 1, GL_FALSE, glm::value_ptr(mvp));
+
+	glUniform3f(sColorLocation, mColor[0], mColor[1], mColor[2]);
 }
 
 void Solid::setInitialTransX(float x) {

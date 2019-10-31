@@ -44,7 +44,7 @@ public:
 
 		// roof
 		mRoof = triangulate(std::vector<unsigned int> {
-			46, 40, 41, 47,
+			47, 41, 40, 46,
 				46, 44, 45, 47,
 				54, 56, 57, 50,
 				51, 57, 56, 55
@@ -63,9 +63,11 @@ public:
 		setMvp(vp, rotation);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
+		glUniform3f(sColorLocation, 0, 0.51f, 0.56f);
 		glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, (void*)0);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO2);
+		glUniform3f(sColorLocation, 0.78f, 0.16f, 0.16f);
 		glDrawElements(GL_TRIANGLES, mRoof.size(), GL_UNSIGNED_INT, (void*)0);
 	}
 };

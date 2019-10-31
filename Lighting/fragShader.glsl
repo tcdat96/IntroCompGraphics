@@ -2,5 +2,10 @@
 in vec3 color;
 out vec4 fragColor;
 void main() {
-	fragColor = vec4(color, 1.0);
+	if(gl_FrontFacing) {
+		fragColor = vec4(color, 1.0);
+	}
+	else {
+		fragColor = vec4(0.8, 0.8, 0.8, 1.0);
+	}
 }

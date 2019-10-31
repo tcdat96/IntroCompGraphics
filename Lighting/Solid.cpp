@@ -2,6 +2,7 @@
 
 GLint Solid::sMvpLocation = 1;
 GLint Solid::sColorLocation = 2;
+std::vector<GLfloat> Solid::vPositions;
 
 Solid::~Solid()
 {
@@ -11,9 +12,10 @@ Solid::~Solid()
 Solid::Solid(std::vector<unsigned int> indices, int vpf)
 {
 	mIndices = vpf == 3 ? indices : triangulate(indices, vpf);
-	glGenBuffers(1, &mIBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(unsigned int), &mIndices[0], GL_STATIC_DRAW);
+
+	glGenBuffers(1, &mVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+	glBufferData(GL_ARRAY_BUFFER, mIndices.size() * 3 * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
 
 	mColor[0] = rand(0, 1);
 	mColor[1] = rand(0, 1);
@@ -78,8 +80,13 @@ void Solid::render(bool rotation)
 
 void Solid::render(mat4 vp, bool rotation)
 {
+	glBindBuffer(GL_VERTEX_ARRAY, mVBO);
+	int vSize = sizeof(GLfloat) * 3;
+	for (int i = 0; i < mIndices.size(); i++) {
+		glBufferSubData(GL_ARRAY_BUFFER, vSize * i, vSize, &vPositions[mIndices[i] * 3]);
+	}
+
 	setMvp(vp, rotation);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
-	glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, (void*)0);
+	glDrawArrays(GL_TRIANGLES, 0, mIndices.size());
 }

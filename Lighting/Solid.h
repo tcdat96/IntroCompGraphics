@@ -16,7 +16,7 @@ using namespace glm;
 
 class Solid {
 protected:
-	GLuint mIBO = 0;
+	GLuint mVBO = 0;
 	std::vector<unsigned int> mIndices;
 	GLfloat mColor[3] = { 1, 0, 0 };
 
@@ -35,6 +35,7 @@ protected:
 	std::vector<unsigned int> triangulate(std::vector<unsigned int> indices, int vpf);
 
 public:
+	static std::vector<GLfloat> vPositions;
 	static GLint sMvpLocation;
 	static GLint sColorLocation;
 

@@ -5,7 +5,7 @@ glm::mat4 ObjectManager::sVP = glm::mat4(1);
 ObjectManager::ObjectManager() {
 	float phi = (1 + (float)sqrt(5)) / 2;
 	float iphi = 1.0f / phi;
-	vPositions = {
+	Solid::vPositions = {
 		// cube
 		// tetrahedron 
 		-1,-1,-1,
@@ -87,12 +87,6 @@ ObjectManager::ObjectManager() {
 		8,4,4
 	};
 
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	int bufferSize = getBufferSize();
-	glBufferData(GL_ARRAY_BUFFER, bufferSize * 2, NULL, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSize, &vPositions[0]);
-
 	generateObjects();
 }
 
@@ -158,7 +152,6 @@ void ObjectManager::generateObjects()
 			26, 6, 35, 4, 27,
 			27, 5, 34, 7, 26
 	}, 5);
-
 	Solid* myHouse = new MyHouse();
 
 	mObjects.push_back(myHouse);
@@ -172,12 +165,6 @@ void ObjectManager::generateObjects()
 	for (unsigned int i = 1; i < mObjects.size(); i++) {
 		mObjects[i]->setInitialTransX(TRANSLATE_DELTA * 2 + TRANSLATE_DELTA * i);
 	}
-}
-
-
-int ObjectManager::getBufferSize() {
-	//return vPositions.size() * sizeof(glm::vec3);
-	return vPositions.size() * sizeof(GLfloat);
 }
 
 void ObjectManager::setViewIndex(unsigned int index) {

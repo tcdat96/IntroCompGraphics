@@ -13,11 +13,7 @@ class ObjectManager {
 private:
 	static glm::mat4 sVP;
 
-	std::vector<GLfloat> vPositions;
 	std::vector<Solid*> mObjects;
-
-	GLuint VBO;
-	GLuint IBO;
 
 	int mViewIndex = 1;
 	bool mIsSolid = true;
@@ -33,8 +29,6 @@ private:
 
 	void generateObjects();
 
-	int getBufferSize();
-
 public:
 	int mVertexCount = 0;
 
@@ -42,14 +36,6 @@ public:
 	{
 		static ObjectManager instance;
 		return &instance;
-	}
-
-	GLuint getVbo() {
-		return VBO;
-	}
-
-	int getColorPtr() {
-		return getBufferSize();
 	}
 
 	void setViewIndex(unsigned int index);

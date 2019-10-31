@@ -5,7 +5,6 @@
 class MyHouse : public Solid {
 private:
 	std::vector<unsigned int> mRoof;
-	GLuint mIBO2;
 protected:
 public:
 	MyHouse() {
@@ -17,6 +16,7 @@ public:
 			38, 40, 41, 39,
 				49, 51, 55, 53,
 				48, 52, 54, 50,
+				//48, 50, 51, 49
 		}, 4);
 
 		auto pents = triangulate(std::vector<unsigned int> {
@@ -38,9 +38,6 @@ public:
 		mIndices.insert(mIndices.end(), quads.begin(), quads.end());
 		mIndices.insert(mIndices.end(), pents.begin(), pents.end());
 		mIndices.insert(mIndices.end(), hexa.begin(), hexa.end());
-		glGenBuffers(1, &mIBO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(unsigned int), &mIndices[0], GL_STATIC_DRAW);
 
 		// roof
 		mRoof = triangulate(std::vector<unsigned int> {
@@ -49,9 +46,6 @@ public:
 				54, 56, 57, 50,
 				51, 57, 56, 55
 		}, 4);
-		glGenBuffers(1, &mIBO2);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO2);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mRoof.size() * sizeof(unsigned int), &mRoof[0], GL_STATIC_DRAW);
 
 		mCamera = glm::vec3(30, 10, 30);
 		setPointOfInterest();
@@ -59,15 +53,18 @@ public:
 
 	~MyHouse() {}
 
+	void render(std::vector<unsigned int> indices, GLfloat r, GLfloat g, GLfloat b) {
+		int vSize = sizeof(GLfloat) * 3;
+		for (int i = 0; i < indices.size(); i++) {
+			glBufferSubData(GL_ARRAY_BUFFER, vSize * i, vSize, &vPositions[indices[i] * 3]);
+		}
+		glUniform3f(sColorLocation, r, g, b);
+		glDrawArrays(GL_TRIANGLES, 0, indices.size());
+	}
+
 	void render(mat4 vp, bool rotation) {
 		setMvp(vp, rotation);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
-		glUniform3f(sColorLocation, 0, 0.51f, 0.56f);
-		glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, (void*)0);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO2);
-		glUniform3f(sColorLocation, 0.78f, 0.16f, 0.16f);
-		glDrawElements(GL_TRIANGLES, mRoof.size(), GL_UNSIGNED_INT, (void*)0);
+		render(mIndices, 0, 0.51f, 0.56f);
+		render(mRoof, 0.78f, 0.16f, 0.16f);
 	}
 };

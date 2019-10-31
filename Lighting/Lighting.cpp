@@ -100,7 +100,6 @@ void setUpShaders() {
 	// position attribute
 	GLint vPosition = glGetAttribLocation(gVertexProgram, "vPosition");
 	glEnableVertexAttribArray(vPosition);
-	glBindBuffer(GL_ARRAY_BUFFER, gObjectManager->getVbo());
 	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 	// color attribute

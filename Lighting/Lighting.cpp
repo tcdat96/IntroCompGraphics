@@ -8,6 +8,7 @@ ObjectManager* gObjectManager;
 float gFovy = 45;
 GLint gProjectionLocation;
 
+bool gSunEffect = false;
 GLint gLightLocation;
 
 int main(void)
@@ -95,8 +96,12 @@ void setUpProjection() {
 }
 
 void setUpLight() {
-	auto light = glm::vec3(5, 5, 5);
-	glUniformMatrix4fv(gLightLocation, 1, GL_FALSE, glm::value_ptr(light));
+	static float sSunAngle = 0;
+	sSunAngle += 0.001f;
+	if (sSunAngle > M_PI * 2) sSunAngle = 0;
+
+	auto radius = 10.0f;
+	glUniform3f(gLightLocation, radius * cos(sSunAngle), radius * sinf(sSunAngle), 0);
 }
 
 void setUpShaders() {
@@ -132,6 +137,10 @@ void renderWorld() {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	if (gSunEffect) {
+		setUpLight();
+	}
+
 	gObjectManager->render();
 }
 
@@ -157,6 +166,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		case GLFW_KEY_R:
 			gObjectManager->toggleRotation();
 			break;
+		case GLFW_KEY_U:
+			gSunEffect = !gSunEffect;
 		case GLFW_KEY_1:
 		case GLFW_KEY_2:
 		case GLFW_KEY_3:

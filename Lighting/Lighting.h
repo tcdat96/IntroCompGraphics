@@ -1,5 +1,7 @@
 #pragma once
 
+#define _USE_MATH_DEFINES
+
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>

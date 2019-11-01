@@ -15,11 +15,13 @@ Solid::Solid(std::vector<unsigned int> indices, int vpf)
 
 	glGenBuffers(1, &mVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	glBufferData(GL_ARRAY_BUFFER, mIndices.size() * 3 * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, mIndices.size() * 3 * sizeof(GLfloat) * 2, NULL, GL_STATIC_DRAW);
 
 	mColor[0] = rand(0, 1);
 	mColor[1] = rand(0, 1);
 	mColor[2] = rand(0, 1);
+
+	computeNormals();
 
 	setPointOfInterest();
 }
@@ -35,6 +37,18 @@ std::vector<unsigned int> Solid::triangulate(std::vector<unsigned int> indices, 
 		}
 	}
 	return result;
+}
+
+void Solid::computeNormals()
+{
+	for (unsigned int i = 0; i < mIndices.size();) {
+		glm::vec3 v[3];
+		for (int j = 0; j < 3; j++) {
+			int index = mIndices[i++] * 3;
+			v[j] = { vPositions[index], vPositions[index + 1],vPositions[index + 2] };
+		}
+		vNormals.push_back(glm::cross(v[1] - v[0], v[2] - v[1]));
+	}
 }
 
 void Solid::setPointOfInterest(vec3 pointOfInterest)
@@ -82,8 +96,9 @@ void Solid::render(mat4 vp, bool rotation)
 {
 	glBindBuffer(GL_VERTEX_ARRAY, mVBO);
 	int vSize = sizeof(GLfloat) * 3;
-	for (int i = 0; i < mIndices.size(); i++) {
-		glBufferSubData(GL_ARRAY_BUFFER, vSize * i, vSize, &vPositions[mIndices[i] * 3]);
+	for (unsigned int i = 0; i < mIndices.size(); i++) {
+		glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2, vSize, &vPositions[mIndices[i] * 3]);
+		//glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2 + vSize, vSize, &vNormals[i / 3]);
 	}
 
 	setMvp(vp, rotation);

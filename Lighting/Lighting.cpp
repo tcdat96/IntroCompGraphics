@@ -100,7 +100,12 @@ void setUpShaders() {
 	// position attribute
 	GLint vPosition = glGetAttribLocation(gVertexProgram, "vPosition");
 	glEnableVertexAttribArray(vPosition);
-	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
+
+	// position attribute
+	GLint vNormal = glGetAttribLocation(gVertexProgram, "vNormal");
+	glEnableVertexAttribArray(vNormal);
+	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
 	// color attribute
 	GLint vColor = glGetUniformLocation(gVertexProgram, "vColor");

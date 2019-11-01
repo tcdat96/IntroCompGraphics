@@ -18,6 +18,7 @@ class Solid {
 protected:
 	GLuint mVBO = 0;
 	std::vector<unsigned int> mIndices;
+	std::vector<glm::vec3> vNormals;
 	GLfloat mColor[3] = { 1, 0, 0 };
 
 	glm::vec3 mCamera = glm::vec3(5, 2, 5);
@@ -28,6 +29,8 @@ protected:
 	glm::mat4 mVP = glm::mat4(1);
 	glm::mat4 mView = glm::mat4(1);
 	glm::mat4 mModel = glm::mat4(1);
+
+	void computeNormals();
 
 	void setPointOfInterest(vec3 pointOfInterest = vec3(0));
 

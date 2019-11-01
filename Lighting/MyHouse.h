@@ -56,7 +56,7 @@ public:
 	void render(std::vector<unsigned int> indices, GLfloat r, GLfloat g, GLfloat b) {
 		int vSize = sizeof(GLfloat) * 3;
 		for (int i = 0; i < indices.size(); i++) {
-			glBufferSubData(GL_ARRAY_BUFFER, vSize * i, vSize, &vPositions[indices[i] * 3]);
+			glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2, vSize, &vPositions[indices[i] * 3]);
 		}
 		glUniform3f(sColorLocation, r, g, b);
 		glDrawArrays(GL_TRIANGLES, 0, indices.size());

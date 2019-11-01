@@ -1,5 +1,6 @@
 #version 400
 in vec3 vPosition;
+in vec3 vNormal;
 uniform vec3 vColor;
 uniform mat4 MVP;
 out vec3 color;

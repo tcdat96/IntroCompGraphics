@@ -3,10 +3,12 @@
 GLuint VAO = 0;
 GLuint gVertexProgram, gWireframeProgram;
 
-glm::mat4 gProjection = glm::mat4(1);
-float gFovy = 45;
-
 ObjectManager* gObjectManager;
+
+float gFovy = 45;
+GLint gProjectionLocation;
+
+GLint gLightLocation;
 
 int main(void)
 {
@@ -15,7 +17,6 @@ int main(void)
 		return -1;
 	}
 	setUpData();
-	setUpShaders();
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -83,13 +84,19 @@ int setUpOpenGlComponents() {
 
 void setUpData() {
 	gObjectManager = ObjectManager::getInstance();
+	setUpShaders();
 	setUpProjection();
+	setUpLight();
 }
 
-void setUpProjection()
-{
-	gProjection = glm::perspective(glm::radians(gFovy), 4.0f / 3.0f, 0.1f, 100.0f);
-	gObjectManager->setProjectionMatrix(gProjection);
+void setUpProjection() {
+	auto projection = glm::perspective(glm::radians(gFovy), 4.0f / 3.0f, 0.1f, 100.0f);
+	glUniformMatrix4fv(gProjectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
+}
+
+void setUpLight() {
+	auto light = glm::vec3(5, 5, 5);
+	glUniformMatrix4fv(gLightLocation, 1, GL_FALSE, glm::value_ptr(light));
 }
 
 void setUpShaders() {
@@ -107,21 +114,14 @@ void setUpShaders() {
 	glEnableVertexAttribArray(vNormal);
 	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
-	// color attribute
-	GLint vColor = glGetUniformLocation(gVertexProgram, "vColor");
-	if (vColor < 0) {
-		std::cerr << "couldn't find vColor in shader\n";
-		exit(0);
-	}
-	gObjectManager->setColorLocation(vColor);
+	gProjectionLocation = getUniformLocation(gVertexProgram, "projection");
+	gLightLocation = getUniformLocation(gVertexProgram, "lightPos");
 
-	// MVP location
-	GLint mvpLocation = glGetUniformLocation(gVertexProgram, "MVP");
-	if (mvpLocation < 0) {
-		std::cerr << "couldn't find MVP in shader\n";
-		exit(0);
-	}
-	gObjectManager->setMvpLocation(mvpLocation);
+	GLint modelView = getUniformLocation(gVertexProgram, "modelView");
+	gObjectManager->setModelViewLocation(modelView);
+
+	GLint fColor = getUniformLocation(gVertexProgram, "fColor");
+	gObjectManager->setColorLocation(fColor);
 
 	// wireframe shader
 	gWireframeProgram = initShaders(WIREFRAME_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);

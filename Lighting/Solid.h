@@ -26,9 +26,7 @@ protected:
 	float mAngle = 0;
 	float mTranslateX = 0;
 
-	glm::mat4 mVP = glm::mat4(1);
 	glm::mat4 mView = glm::mat4(1);
-	glm::mat4 mModel = glm::mat4(1);
 
 	void computeNormals();
 
@@ -39,7 +37,7 @@ protected:
 
 public:
 	static std::vector<GLfloat> vPositions;
-	static GLint sMvpLocation;
+	static GLint sModelViewLocation;
 	static GLint sColorLocation;
 
 	Solid() {}
@@ -48,10 +46,6 @@ public:
 
 	std::vector<unsigned int> getIndices() {
 		return mIndices;
-	}
-
-	void setProjectionMatrix(glm::mat4 projection) {
-		mVP = projection * mView;
 	}
 
 	void setInitialTransX(float x);

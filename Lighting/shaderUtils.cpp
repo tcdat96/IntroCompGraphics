@@ -61,3 +61,13 @@ static GLuint initShader(const char* source, GLenum type) {
 
 	return shader;
 }
+
+GLint getUniformLocation(GLuint program, const GLchar* name)
+{
+	GLint location = glGetUniformLocation(program, name);
+	if (location < 0) {
+		std::cerr << "Couldn't find " << name << " in shader\n";
+		exit(0);
+	}
+	return location;
+}

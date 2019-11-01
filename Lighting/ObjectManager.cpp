@@ -1,6 +1,10 @@
 #include "ObjectManager.h"
 
-glm::mat4 ObjectManager::sVP = glm::mat4(1);
+glm::mat4 ObjectManager::sView = glm::lookAt(
+	vec3(50, 8, 40),
+	vec3(TRANSLATE_DELTA * 4, 0, 0),
+	vec3(0, 1, 0)
+);
 
 ObjectManager::ObjectManager() {
 	float phi = (1 + (float)sqrt(5)) / 2;
@@ -173,25 +177,13 @@ void ObjectManager::setViewIndex(unsigned int index) {
 	}
 }
 
-void ObjectManager::setProjectionMatrix(glm::mat4 projection) {
-	auto view = glm::lookAt(
-		vec3(50, 8, 40),
-		vec3(TRANSLATE_DELTA * 4, 0, 0),
-		vec3(0, 1, 0)
-	);
-	sVP = projection * view;
-	for (auto it = mObjects.begin(); it != mObjects.end(); it++) {
-		(*it)->setProjectionMatrix(projection);
-	}
-}
-
 void ObjectManager::render() {
 	if (mViewIndex > 1) {
 		mObjects[mViewIndex - 2]->render(mRotation);
 	}
 	else {
 		for (auto it = mObjects.begin(); it != mObjects.end(); it++) {
-			(*it)->render(sVP, mRotation);
+			(*it)->render(sView, mRotation);
 		}
 	}
 }

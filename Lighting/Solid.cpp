@@ -1,7 +1,7 @@
 #include "Solid.h"
 
-GLint Solid::sMvpLocation = 1;
-GLint Solid::sColorLocation = 2;
+GLint Solid::sModelViewLocation;
+GLint Solid::sColorLocation;
 std::vector<GLfloat> Solid::vPositions;
 
 Solid::~Solid()
@@ -17,9 +17,9 @@ Solid::Solid(std::vector<unsigned int> indices, int vpf)
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
 	glBufferData(GL_ARRAY_BUFFER, mIndices.size() * 3 * sizeof(GLfloat) * 2, NULL, GL_STATIC_DRAW);
 
-	mColor[0] = rand(0, 1);
-	mColor[1] = rand(0, 1);
-	mColor[2] = rand(0, 1);
+	mColor[0] = rand(0.25, 1);
+	mColor[1] = rand(0.25, 1);
+	mColor[2] = rand(0.25, 1);
 
 	computeNormals();
 
@@ -59,20 +59,20 @@ void Solid::setPointOfInterest(vec3 pointOfInterest)
 	mView = glm::lookAt(mCamera, pointOfInterest, cameraUp);
 }
 
-void Solid::setMvp(mat4 vp, bool rotation)
+void Solid::setMvp(mat4 view, bool rotation)
 {
 	if (rotation) {
 		if (mAngle > M_PI * 2) mAngle = 0;
 		else mAngle += 0.001f;
 	}
 
-	mModel = mTranslateX == 0 ? mat4(1) : glm::translate(mat4(1), vec3(mTranslateX, 0, 0));
+	auto model = mTranslateX == 0 ? mat4(1) : glm::translate(mat4(1), vec3(mTranslateX, 0, 0));
 	if (mAngle > 0) {
-		mModel = glm::rotate(mModel, mAngle, vec3(0, 1, 0));
+		model = glm::rotate(model, mAngle, vec3(0, 1, 0));
 	}
 
-	auto mvp = vp * mModel;
-	glUniformMatrix4fv(sMvpLocation, 1, GL_FALSE, glm::value_ptr(mvp));
+	auto modelView = view * model;
+	glUniformMatrix4fv(sModelViewLocation, 1, GL_FALSE, glm::value_ptr(modelView));
 
 	glUniform3f(sColorLocation, mColor[0], mColor[1], mColor[2]);
 }
@@ -82,26 +82,26 @@ void Solid::setInitialTransX(float x) {
 	setPointOfInterest();
 }
 
-void Solid::render(mat4 vp)
+void Solid::render(mat4 view)
 {
-	render(vp, false);
+	render(view, false);
 }
 
 void Solid::render(bool rotation)
 {
-	render(mVP, rotation);
+	render(mView, rotation);
 }
 
-void Solid::render(mat4 vp, bool rotation)
+void Solid::render(mat4 view, bool rotation)
 {
 	glBindBuffer(GL_VERTEX_ARRAY, mVBO);
 	int vSize = sizeof(GLfloat) * 3;
 	for (unsigned int i = 0; i < mIndices.size(); i++) {
 		glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2, vSize, &vPositions[mIndices[i] * 3]);
-		//glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2 + vSize, vSize, &vNormals[i / 3]);
+		glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2 + vSize, vSize, &vNormals[i / 3]);
 	}
 
-	setMvp(vp, rotation);
+	setMvp(view, rotation);
 
 	glDrawArrays(GL_TRIANGLES, 0, mIndices.size());
 }

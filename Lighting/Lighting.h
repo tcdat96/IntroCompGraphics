@@ -40,6 +40,7 @@ int main(void);
 int setUpOpenGlComponents();
 void setUpData();
 void setUpProjection();
+void setUpLight();
 void setUpShaders();
 void renderWorld();
 

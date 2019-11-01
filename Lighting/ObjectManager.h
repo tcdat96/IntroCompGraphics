@@ -11,7 +11,7 @@ constexpr float TRANSLATE_DELTA = 6;
 
 class ObjectManager {
 private:
-	static glm::mat4 sVP;
+	static glm::mat4 sView;
 
 	std::vector<Solid*> mObjects;
 
@@ -40,14 +40,12 @@ public:
 
 	void setViewIndex(unsigned int index);
 
-	void setProjectionMatrix(glm::mat4 projection);
-
-	void setColorLocation(GLuint location) {
-		Solid::sColorLocation = location;
+	void setModelViewLocation(GLint location) {
+		Solid::sModelViewLocation = location;
 	}
 
-	void setMvpLocation(GLuint location) {
-		Solid::sMvpLocation = location;
+	void setColorLocation(GLint location) {
+		Solid::sColorLocation = location;
 	}
 
 	void toggleRotation() {

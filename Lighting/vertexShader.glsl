@@ -3,17 +3,17 @@
 in vec3 vPosition;
 in vec3 vNormal;
 
-uniform mat4 modelView;
+out vec3 FragPos;
+out vec3 Normal;
+
+uniform mat4 model;
+uniform mat4 view;
 uniform mat4 projection;
 
-out vec3 fPosition;
-out vec3 fNormal;
-
-void main() {
-	gl_Position = projection * modelView * vec4(vPosition, 1.0);
-
-	vec4 vertPos4 = modelView * vec4(vPosition, 1.0);
-    fPosition = vec3(vertPos4) / vertPos4.w;
-
-	fNormal = vNormal;
+void main()
+{
+	FragPos = vec3(model * vec4(vPosition, 1.0));
+    Normal = mat3(transpose(inverse(model))) * vNormal;  
+    
+    gl_Position = projection * view * vec4(FragPos, 1.0);
 }

@@ -5,11 +5,12 @@
 class MyHouse : public Solid {
 private:
 	std::vector<unsigned int> mRoof;
+	std::vector<glm::vec3> mRoofNormals;
 protected:
 public:
 	MyHouse() {
 		mIndices = {
-			54, 55, 56
+			54, 55, 56,
 		};
 
 		auto quads = triangulate(std::vector<unsigned int> {
@@ -38,6 +39,7 @@ public:
 		mIndices.insert(mIndices.end(), quads.begin(), quads.end());
 		mIndices.insert(mIndices.end(), pents.begin(), pents.end());
 		mIndices.insert(mIndices.end(), hexa.begin(), hexa.end());
+		computeNormals();
 
 		// roof
 		mRoof = triangulate(std::vector<unsigned int> {
@@ -46,21 +48,19 @@ public:
 				54, 56, 57, 50,
 				51, 57, 56, 55
 		}, 4);
+		mRoofNormals = computeNormals(mRoof);
 
 		mCamera = glm::vec3(30, 10, 30);
-		
-		computeNormals();
-
 		setPointOfInterest();
 	}
 
 	~MyHouse() {}
 
-	void render(std::vector<unsigned int> indices, GLfloat r, GLfloat g, GLfloat b) {
+	void render(std::vector<unsigned int> indices, std::vector<glm::vec3> normals, GLfloat r, GLfloat g, GLfloat b) {
 		int vSize = sizeof(GLfloat) * 3;
 		for (unsigned int i = 0; i < indices.size(); i++) {
 			glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2, vSize, &vPositions[indices[i] * 3]);
-			glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2 + vSize, vSize, &vNormals[i / 3]);
+			glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2 + vSize, vSize, &normals[i / 3]);
 		}
 		glUniform3f(sColorLocation, r, g, b);
 		glDrawArrays(GL_TRIANGLES, 0, indices.size());
@@ -68,7 +68,7 @@ public:
 
 	void render(mat4 vp, bool rotation) {
 		setMvp(vp, rotation);
-		render(mIndices, 0, 0.51f, 0.56f);
-		render(mRoof, 0.78f, 0.16f, 0.16f);
+		render(mIndices, vNormals, 0, 0.51f, 0.56f);
+		render(mRoof, mRoofNormals, 0.78f, 0.16f, 0.16f);
 	}
 };

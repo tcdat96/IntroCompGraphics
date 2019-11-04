@@ -1,6 +1,7 @@
 #include "Solid.h"
 
-GLint Solid::sModelViewLocation;
+GLint Solid::sModelLocation;
+GLint Solid::sViewLocation;
 GLint Solid::sColorLocation;
 std::vector<GLfloat> Solid::vPositions;
 
@@ -12,10 +13,6 @@ Solid::~Solid()
 Solid::Solid(std::vector<unsigned int> indices, int vpf)
 {
 	mIndices = vpf == 3 ? indices : triangulate(indices, vpf);
-
-	glGenBuffers(1, &mVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	glBufferData(GL_ARRAY_BUFFER, mIndices.size() * 3 * sizeof(GLfloat) * 2, NULL, GL_STATIC_DRAW);
 
 	mColor[0] = rand(0.25, 1);
 	mColor[1] = rand(0.25, 1);
@@ -39,16 +36,23 @@ std::vector<unsigned int> Solid::triangulate(std::vector<unsigned int> indices, 
 	return result;
 }
 
-void Solid::computeNormals()
+void Solid::computeNormals() {
+	auto normals = computeNormals(mIndices);
+	vNormals.insert(vNormals.end(), normals.begin(), normals.end());
+}
+
+std::vector<glm::vec3> Solid::computeNormals(std::vector<unsigned int> indices)
 {
-	for (unsigned int i = 0; i < mIndices.size();) {
-		glm::vec3 v[3];
+	std::vector<glm::vec3> normals;
+	glm::vec3 v[3];
+	for (unsigned int i = 0; i < indices.size(); i += 3) {
 		for (int j = 0; j < 3; j++) {
-			int index = mIndices[i++] * 3;
-			v[j] = { vPositions[index], vPositions[index + 1],vPositions[index + 2] };
+			int index = indices[i + j] * 3;
+			v[j] = { vPositions[index], vPositions[index + 1], vPositions[index + 2] };
 		}
-		vNormals.push_back(glm::cross(v[1] - v[0], v[2] - v[1]));
+		normals.push_back(glm::cross(v[1] - v[0], v[2] - v[0]));
 	}
+	return normals;
 }
 
 void Solid::setPointOfInterest(vec3 pointOfInterest)
@@ -71,8 +75,9 @@ void Solid::setMvp(mat4 view, bool rotation)
 		model = glm::rotate(model, mAngle, vec3(0, 1, 0));
 	}
 
-	auto modelView = view * model;
-	glUniformMatrix4fv(sModelViewLocation, 1, GL_FALSE, glm::value_ptr(modelView));
+	//auto modelView = view * model;
+	glUniformMatrix4fv(sModelLocation, 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(sViewLocation, 1, GL_FALSE, glm::value_ptr(view));
 
 	glUniform3f(sColorLocation, mColor[0], mColor[1], mColor[2]);
 }
@@ -94,7 +99,6 @@ void Solid::render(bool rotation)
 
 void Solid::render(mat4 view, bool rotation)
 {
-	glBindBuffer(GL_VERTEX_ARRAY, mVBO);
 	int vSize = sizeof(GLfloat) * 3;
 	for (unsigned int i = 0; i < mIndices.size(); i++) {
 		glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2, vSize, &vPositions[mIndices[i] * 3]);

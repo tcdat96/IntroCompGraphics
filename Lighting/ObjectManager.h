@@ -15,6 +15,9 @@ private:
 
 	std::vector<Solid*> mObjects;
 
+	GLuint mVBO;
+	GLfloat mLight[18];
+
 	int mViewIndex = 1;
 	bool mIsSolid = true;
 	bool mRotation = false;
@@ -40,13 +43,16 @@ public:
 
 	void setViewIndex(unsigned int index);
 
-	void setModelViewLocation(GLint location) {
-		Solid::sModelViewLocation = location;
+	void setModelViewLocation(GLint model, GLint view) {
+		Solid::sModelLocation = model;
+		Solid::sViewLocation = view;
 	}
 
 	void setColorLocation(GLint location) {
 		Solid::sColorLocation = location;
 	}
+
+	void setLightPosition(float x, float y, float z);
 
 	void toggleRotation() {
 		mRotation = !mRotation;

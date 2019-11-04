@@ -80,6 +80,9 @@ int setUpOpenGlComponents() {
 
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
+
 	return 1;
 }
 
@@ -97,11 +100,13 @@ void setUpProjection() {
 
 void setUpLight() {
 	static float sSunAngle = 0;
-	sSunAngle += 0.001f;
+	sSunAngle += 0.005f;
 	if (sSunAngle > M_PI * 2) sSunAngle = 0;
 
-	auto radius = 10.0f;
-	glUniform3f(gLightLocation, radius * cos(sSunAngle), radius * sinf(sSunAngle), 0);
+	auto radius = 30.0f;
+	auto lightPos = glm::vec3(radius * cosf(sSunAngle), 0, radius * sinf(sSunAngle));
+	glUniform3f(gLightLocation, lightPos[0], lightPos[1], lightPos[2]);
+	gObjectManager->setLightPosition(lightPos[0], lightPos[1], lightPos[2]);
 }
 
 void setUpShaders() {
@@ -122,14 +127,17 @@ void setUpShaders() {
 	gProjectionLocation = getUniformLocation(gVertexProgram, "projection");
 	gLightLocation = getUniformLocation(gVertexProgram, "lightPos");
 
-	GLint modelView = getUniformLocation(gVertexProgram, "modelView");
-	gObjectManager->setModelViewLocation(modelView);
+	//GLint modelView = getUniformLocation(gVertexProgram, "modelView");
+	//gObjectManager->setModelViewLocation(modelView);
+
+	gObjectManager->setModelViewLocation(getUniformLocation(gVertexProgram, "model"),
+		getUniformLocation(gVertexProgram, "view"));
 
 	GLint fColor = getUniformLocation(gVertexProgram, "fColor");
 	gObjectManager->setColorLocation(fColor);
 
 	// wireframe shader
-	gWireframeProgram = initShaders(WIREFRAME_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
+	//gWireframeProgram = initShaders(WIREFRAME_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
 }
 
 void renderWorld() { 
@@ -168,6 +176,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			break;
 		case GLFW_KEY_U:
 			gSunEffect = !gSunEffect;
+			break;
+		case GLFW_KEY_G:
+			setUpProjection();
+			setUpLight();
+			break;
 		case GLFW_KEY_1:
 		case GLFW_KEY_2:
 		case GLFW_KEY_3:

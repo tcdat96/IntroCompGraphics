@@ -17,7 +17,6 @@ using namespace glm;
 
 class Solid {
 protected:
-	GLuint mVBO = 0;
 	std::vector<unsigned int> mIndices;
 	std::vector<glm::vec3> vNormals;
 	GLfloat mColor[3] = { 1, 0, 0 };
@@ -30,6 +29,7 @@ protected:
 	glm::mat4 mView = glm::mat4(1);
 
 	void computeNormals();
+	static std::vector<glm::vec3> computeNormals(std::vector<unsigned int> indices);
 
 	void setPointOfInterest(vec3 pointOfInterest = vec3(0));
 
@@ -37,8 +37,10 @@ protected:
 	std::vector<unsigned int> triangulate(std::vector<unsigned int> indices, int vpf);
 
 public:
+	static GLuint sVBO;
 	static std::vector<GLfloat> vPositions;
-	static GLint sModelViewLocation;
+	static GLint sViewLocation;
+	static GLint sModelLocation;
 	static GLint sColorLocation;
 
 	Solid() {}

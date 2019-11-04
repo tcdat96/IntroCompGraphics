@@ -134,11 +134,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="fragShader.glsl" />
-    <None Include="fragShaderGouraud.glsl" />
-    <None Include="fragShaderTest.glsl" />
     <None Include="vertexShader.glsl" />
-    <None Include="vertexShaderGouraud.glsl" />
-    <None Include="vertexShaderTest.glsl" />
     <None Include="wireframeShader.glsl" />
   </ItemGroup>
   <ItemGroup>

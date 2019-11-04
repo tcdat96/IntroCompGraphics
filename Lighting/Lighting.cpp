@@ -127,17 +127,11 @@ void setUpShaders() {
 	gProjectionLocation = getUniformLocation(gVertexProgram, "projection");
 	gLightLocation = getUniformLocation(gVertexProgram, "lightPos");
 
-	//GLint modelView = getUniformLocation(gVertexProgram, "modelView");
-	//gObjectManager->setModelViewLocation(modelView);
-
 	gObjectManager->setModelViewLocation(getUniformLocation(gVertexProgram, "model"),
 		getUniformLocation(gVertexProgram, "view"));
 
 	GLint fColor = getUniformLocation(gVertexProgram, "fColor");
 	gObjectManager->setColorLocation(fColor);
-
-	// wireframe shader
-	//gWireframeProgram = initShaders(WIREFRAME_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
 }
 
 void renderWorld() { 
@@ -168,7 +162,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			break;
 		case GLFW_KEY_W:
-			glUseProgram(gWireframeProgram);
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			break;
 		case GLFW_KEY_R:

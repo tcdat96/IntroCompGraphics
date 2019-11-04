@@ -27,18 +27,6 @@
     <None Include="wireframeShader.glsl">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="fragShaderGouraud.glsl">
-      <Filter>Source Files\shaders</Filter>
-    </None>
-    <None Include="vertexShaderGouraud.glsl">
-      <Filter>Source Files\shaders</Filter>
-    </None>
-    <None Include="fragShaderTest.glsl">
-      <Filter>Source Files\shaders</Filter>
-    </None>
-    <None Include="vertexShaderTest.glsl">
-      <Filter>Source Files\shaders</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ObjectManager.cpp">

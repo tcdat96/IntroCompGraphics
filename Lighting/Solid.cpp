@@ -2,7 +2,10 @@
 
 GLint Solid::sModelLocation;
 GLint Solid::sViewLocation;
-GLint Solid::sColorLocation;
+GLint Solid::sAmbientLocation;
+GLint Solid::sDiffuseLocation;
+GLint Solid::sSpecularLocation;
+GLint Solid::sShininessLocation;
 std::vector<GLfloat> Solid::vPositions;
 
 Solid::~Solid()
@@ -63,7 +66,7 @@ void Solid::setPointOfInterest(vec3 pointOfInterest)
 	mView = glm::lookAt(mCamera, pointOfInterest, cameraUp);
 }
 
-void Solid::setMvp(mat4 view, bool rotation)
+void Solid::prepareDraw(mat4 view, bool rotation)
 {
 	if (rotation) {
 		if (mAngle > M_PI * 2) mAngle = 0;
@@ -75,11 +78,17 @@ void Solid::setMvp(mat4 view, bool rotation)
 		model = glm::rotate(model, mAngle, vec3(0, 1, 0));
 	}
 
-	//auto modelView = view * model;
 	glUniformMatrix4fv(sModelLocation, 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(sViewLocation, 1, GL_FALSE, glm::value_ptr(view));
 
-	glUniform3f(sColorLocation, mColor[0], mColor[1], mColor[2]);
+	glm::vec3 ambient = mMaterial.ambient;
+	glUniform3f(sAmbientLocation, ambient[0], ambient[1], ambient[2]);
+	glm::vec3 diffuse = mMaterial.diffuse;
+	glUniform3f(sDiffuseLocation, diffuse[0], diffuse[1], diffuse[2]);
+	glm::vec3 specular = mMaterial.specular;
+	glUniform3f(sSpecularLocation, specular[0], specular[1], specular[2]);
+
+	glUniform1f(sShininessLocation, mMaterial.shininess);
 }
 
 void Solid::setInitialTransX(float x) {
@@ -105,7 +114,7 @@ void Solid::render(mat4 view, bool rotation)
 		glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2 + vSize, vSize, &vNormals[i / 3]);
 	}
 
-	setMvp(view, rotation);
+	prepareDraw(view, rotation);
 
 	glDrawArrays(GL_TRIANGLES, 0, mIndices.size());
 }

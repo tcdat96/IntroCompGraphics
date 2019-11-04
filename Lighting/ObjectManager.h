@@ -43,13 +43,13 @@ public:
 
 	void setViewIndex(unsigned int index);
 
-	void setModelViewLocation(GLint model, GLint view) {
+	void setUniformLocations(GLint model, GLint view, GLint ambient, GLint diffuse, GLint specular, GLint shininess) {
 		Solid::sModelLocation = model;
 		Solid::sViewLocation = view;
-	}
-
-	void setColorLocation(GLint location) {
-		Solid::sColorLocation = location;
+		Solid::sAmbientLocation = ambient;
+		Solid::sDiffuseLocation = diffuse;
+		Solid::sSpecularLocation = specular;
+		Solid::sShininessLocation = shininess;
 	}
 
 	void setLightPosition(float x, float y, float z);

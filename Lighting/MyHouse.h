@@ -4,8 +4,8 @@
 
 class MyHouse : public Solid {
 private:
-	std::vector<unsigned int> mRoof;
-	std::vector<glm::vec3> mRoofNormals;
+	typedef Solid super;
+	Solid* mRoof = NULL;
 protected:
 public:
 	MyHouse() {
@@ -41,34 +41,29 @@ public:
 		mIndices.insert(mIndices.end(), hexa.begin(), hexa.end());
 		computeNormals();
 
+		mMaterial = copper;
+
 		// roof
-		mRoof = triangulate(std::vector<unsigned int> {
+		mRoof = new Solid(std::vector<unsigned int> {
 			47, 41, 40, 46,
 				46, 44, 45, 47,
 				54, 56, 57, 50,
 				51, 57, 56, 55
 		}, 4);
-		mRoofNormals = computeNormals(mRoof);
+		mRoof->setMaterial(gold);
 
 		mCamera = glm::vec3(30, 10, 30);
 		setPointOfInterest();
 	}
 
-	~MyHouse() {}
-
-	void render(std::vector<unsigned int> indices, std::vector<glm::vec3> normals, GLfloat r, GLfloat g, GLfloat b) {
-		int vSize = sizeof(GLfloat) * 3;
-		for (unsigned int i = 0; i < indices.size(); i++) {
-			glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2, vSize, &vPositions[indices[i] * 3]);
-			glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2 + vSize, vSize, &normals[i / 3]);
+	~MyHouse() {
+		if (mRoof != NULL) {
+			delete mRoof;
 		}
-		glUniform3f(sColorLocation, r, g, b);
-		glDrawArrays(GL_TRIANGLES, 0, indices.size());
 	}
 
 	void render(mat4 vp, bool rotation) {
-		setMvp(vp, rotation);
-		render(mIndices, vNormals, 0, 0.51f, 0.56f);
-		render(mRoof, mRoofNormals, 0.78f, 0.16f, 0.16f);
+		super::render(vp, rotation);
+		mRoof->render(vp, rotation);
 	}
 };

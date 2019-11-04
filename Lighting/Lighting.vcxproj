@@ -135,7 +135,6 @@
   <ItemGroup>
     <None Include="fragShader.glsl" />
     <None Include="vertexShader.glsl" />
-    <None Include="wireframeShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Lighting.cpp" />
@@ -146,6 +145,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lighting.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="MyHouse.h" />
     <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="shaderUtils.h" />

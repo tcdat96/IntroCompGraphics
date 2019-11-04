@@ -100,10 +100,10 @@ void setUpProjection() {
 
 void setUpLight() {
 	static float sSunAngle = 0;
-	sSunAngle += 0.005f;
+	sSunAngle += 0.002f;
 	if (sSunAngle > M_PI * 2) sSunAngle = 0;
 
-	auto radius = 30.0f;
+	auto radius = 45.0f;
 	auto lightPos = glm::vec3(radius * cosf(sSunAngle), 0, radius * sinf(sSunAngle));
 	glUniform3f(gLightLocation, lightPos[0], lightPos[1], lightPos[2]);
 	gObjectManager->setLightPosition(lightPos[0], lightPos[1], lightPos[2]);
@@ -127,11 +127,14 @@ void setUpShaders() {
 	gProjectionLocation = getUniformLocation(gVertexProgram, "projection");
 	gLightLocation = getUniformLocation(gVertexProgram, "lightPos");
 
-	gObjectManager->setModelViewLocation(getUniformLocation(gVertexProgram, "model"),
-		getUniformLocation(gVertexProgram, "view"));
-
-	GLint fColor = getUniformLocation(gVertexProgram, "fColor");
-	gObjectManager->setColorLocation(fColor);
+	gObjectManager->setUniformLocations(
+		getUniformLocation(gVertexProgram, "model"),
+		getUniformLocation(gVertexProgram, "view"),
+		getUniformLocation(gVertexProgram, "ambientColor"),
+		getUniformLocation(gVertexProgram, "diffuseColor"),
+		getUniformLocation(gVertexProgram, "specularColor"),
+		getUniformLocation(gVertexProgram, "shininess")
+	);
 }
 
 void renderWorld() { 

@@ -216,7 +216,7 @@ void ObjectManager::render() {
 	}
 	else {
 		// debugging
-		glUniform3f(Solid::sColorLocation, 1, 1, 1);
+		//glUniform3f(Solid::sColorLocation, 1, 1, 1);
 		glUniformMatrix4fv(Solid::sViewLocation, 1, GL_FALSE, glm::value_ptr(sView));
 		glUniformMatrix4fv(Solid::sModelLocation, 1, GL_FALSE, glm::value_ptr(mat4(1)));
 		glBufferSubData(GL_ARRAY_BUFFER, 0, 18 * sizeof(GLfloat), mLight);

@@ -6,7 +6,9 @@ GLint Solid::sAmbientLocation;
 GLint Solid::sDiffuseLocation;
 GLint Solid::sSpecularLocation;
 GLint Solid::sShininessLocation;
+
 std::vector<GLfloat> Solid::vPositions;
+unsigned int Solid::sVertexCount = 0;
 
 Solid::~Solid()
 {
@@ -16,6 +18,7 @@ Solid::~Solid()
 Solid::Solid(std::vector<unsigned int> indices, int vpf)
 {
 	mIndices = vpf == 3 ? indices : triangulate(indices, vpf);
+	sVertexCount += mIndices.size();
 
 	mColor[0] = rand(0.25, 1);
 	mColor[1] = rand(0.25, 1);
@@ -60,24 +63,33 @@ std::vector<glm::vec3> Solid::computeNormals(std::vector<unsigned int> indices)
 
 void Solid::setPointOfInterest(vec3 pointOfInterest)
 {
-	pointOfInterest += vec3(mTranslateX, 0, 0);
-	mCamera += vec3(mTranslateX, 0, 0);
+	pointOfInterest += mTranslate;
+	mCamera += mTranslate;
 	glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
 	mView = glm::lookAt(mCamera, pointOfInterest, cameraUp);
 }
 
-void Solid::prepareDraw(mat4 view, bool rotation)
+void Solid::translate(vec3 translate) {
+	mTranslate = translate;
+	setPointOfInterest();
+}
+
+void Solid::setUpData() {
+	int vSize = sizeof(GLfloat) * 3;
+	for (unsigned int i = 0; i < mIndices.size(); i++) {
+		glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2, vSize, &vPositions[mIndices[i] * 3]);
+		glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2 + vSize, vSize, &vNormals[i / 3]);
+	}
+}
+
+void Solid::setUpAttributes(mat4 view, bool rotation)
 {
 	if (rotation) {
 		if (mAngle > M_PI * 2) mAngle = 0;
 		else mAngle += 0.001f;
 	}
 
-	auto model = mTranslateX == 0 ? mat4(1) : glm::translate(mat4(1), vec3(mTranslateX, 0, 0));
-	if (mAngle > 0) {
-		model = glm::rotate(model, mAngle, vec3(0, 1, 0));
-	}
-
+	auto model = getMatrixModel();
 	glUniformMatrix4fv(sModelLocation, 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(sViewLocation, 1, GL_FALSE, glm::value_ptr(view));
 
@@ -91,14 +103,12 @@ void Solid::prepareDraw(mat4 view, bool rotation)
 	glUniform1f(sShininessLocation, mMaterial.shininess);
 }
 
-void Solid::setInitialTransX(float x) {
-	mTranslateX = x;
-	setPointOfInterest();
-}
-
-void Solid::render(mat4 view)
-{
-	render(view, false);
+glm::mat4 Solid::getMatrixModel() {
+	auto model = glm::translate(mat4(1), mTranslate);
+	if (mAngle > 0) {
+		model = glm::rotate(model, mAngle, vec3(0, 1, 0));
+	}
+	return model;
 }
 
 void Solid::render(bool rotation)
@@ -108,13 +118,7 @@ void Solid::render(bool rotation)
 
 void Solid::render(mat4 view, bool rotation)
 {
-	int vSize = sizeof(GLfloat) * 3;
-	for (unsigned int i = 0; i < mIndices.size(); i++) {
-		glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2, vSize, &vPositions[mIndices[i] * 3]);
-		glBufferSubData(GL_ARRAY_BUFFER, vSize * i * 2 + vSize, vSize, &vNormals[i / 3]);
-	}
-
-	prepareDraw(view, rotation);
-
+	setUpData();
+	setUpAttributes(view, rotation);
 	glDrawArrays(GL_TRIANGLES, 0, mIndices.size());
 }

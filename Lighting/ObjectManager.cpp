@@ -1,7 +1,7 @@
 #include "ObjectManager.h"
 
 glm::mat4 ObjectManager::sView = glm::lookAt(
-	vec3(50, 10, 40),
+	vec3(40, 15, 40),
 	vec3(TRANSLATE_DELTA * 4, 0, 0),
 	vec3(0, 1, 0)
 );
@@ -91,15 +91,15 @@ ObjectManager::ObjectManager() {
 		8,4,4
 	};
 
-	//for (int i = 0; i < 38; i++) {
-	//	Solid::vPositions[i] *= 3;
+	//for (int i = 38 * 3; i < 73 * 3; i++) {
+	//	Solid::vPositions[i] /= 1;
 	//}
+
+	generateObjects();
 
 	glGenBuffers(1, &mVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	glBufferData(GL_ARRAY_BUFFER, 1000 * 2 * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
-
-	generateObjects();
+	glBufferData(GL_ARRAY_BUFFER, 10000 * 2 * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
 }
 
 void ObjectManager::generateObjects()
@@ -165,8 +165,10 @@ void ObjectManager::generateObjects()
 			27, 5, 34, 7, 26
 	}, 5);
 	Solid* myHouse = new MyHouse();
+	Solid* sphere = generateSphere();
 
 	mObjects.push_back(myHouse);
+	mObjects.push_back(sphere);
 	mObjects.push_back(octahedron);
 	mObjects.push_back(dodecahedron);
 	mObjects.push_back(icosahedron);
@@ -174,9 +176,58 @@ void ObjectManager::generateObjects()
 	mObjects.push_back(cube);
 
 	// initial translation
-	for (unsigned int i = 1; i < mObjects.size(); i++) {
-		mObjects[i]->setInitialTransX(TRANSLATE_DELTA * 2 + TRANSLATE_DELTA * i);
+	myHouse->translate(vec3(0, 0, -TRANSLATE_DELTA * 3));
+	sphere->translate(vec3(TRANSLATE_DELTA * 5, 0, -TRANSLATE_DELTA * 3));
+	for (unsigned int i = 2; i < mObjects.size(); i++) {
+		auto translate = vec3(TRANSLATE_DELTA * i, 0, +TRANSLATE_DELTA * 2);
+		mObjects[i]->translate(translate);
 	}
+}
+
+Solid* ObjectManager::generateSphere() {
+	int stacks = 10;
+	int slices = stacks;
+	float radius = 6;
+
+	int offset = (Solid::vPositions.size()) / 3;
+
+	for (int i = 0; i <= stacks; ++i) {
+
+		float V = i / (float)stacks;
+		float phi = V * glm::pi <float>();
+
+		// Loop Through Slices
+		for (int j = 0; j <= slices; ++j) {
+
+			float U = j / (float)slices;
+			float theta = U * (glm::pi <float>() * 2);
+
+			float x = cosf(theta) * sinf(phi);
+			float y = cosf(phi);
+			float z = sinf(theta) * sinf(phi);
+
+			Solid::vPositions.push_back(x * radius);
+			Solid::vPositions.push_back(y * radius);
+			Solid::vPositions.push_back(z * radius);
+		}
+	}
+
+	std::vector<unsigned int> indices;
+	for (int i = 0; i < slices * stacks + slices; ++i) {
+		indices.push_back(i);
+		indices.push_back(i + slices + 1);
+		indices.push_back(i + slices);
+
+		indices.push_back(i + slices + 1);
+		indices.push_back(i);
+		indices.push_back(i + 1);
+	}
+
+	for (int i = 0; i < indices.size(); i++) {
+		indices[i] += offset;
+	}
+	
+	return new Sphere(indices);
 }
 
 void ObjectManager::setLightPosition(float x, float y, float z) {
@@ -194,14 +245,6 @@ void ObjectManager::setLightPosition(float x, float y, float z) {
 		mLight[4 + i * 6] = normal[1];
 		mLight[5 + i * 6] = normal[2];
 	}
-
-	//for (int i = 0; i < 3; i++) {
-	//	for (int j = 0; j < 6; j++) {
-	//		std::cout << mLight[i * 6 + j] << " ";
-	//	}
-	//	std::cout << "\n";
-	//}
-	//std::cout << "\n";
 }
 
 void ObjectManager::setViewIndex(unsigned int index) {
@@ -216,7 +259,6 @@ void ObjectManager::render() {
 	}
 	else {
 		// debugging
-		//glUniform3f(Solid::sColorLocation, 1, 1, 1);
 		glUniformMatrix4fv(Solid::sViewLocation, 1, GL_FALSE, glm::value_ptr(sView));
 		glUniformMatrix4fv(Solid::sModelLocation, 1, GL_FALSE, glm::value_ptr(mat4(1)));
 		glBufferSubData(GL_ARRAY_BUFFER, 0, 18 * sizeof(GLfloat), mLight);

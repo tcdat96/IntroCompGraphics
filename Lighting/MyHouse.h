@@ -43,6 +43,8 @@ public:
 
 		mMaterial = copper;
 
+		Solid::sVertexCount += mIndices.size();
+
 		// roof
 		mRoof = new Solid(std::vector<unsigned int> {
 			47, 41, 40, 46,
@@ -60,6 +62,11 @@ public:
 		if (mRoof != NULL) {
 			delete mRoof;
 		}
+	}
+
+	void translate(vec3 translate) {
+		super::translate(translate);
+		mRoof->translate(translate);
 	}
 
 	void render(mat4 vp, bool rotation) {

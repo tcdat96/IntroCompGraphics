@@ -25,23 +25,27 @@ protected:
 	glm::vec3 mCamera = glm::vec3(5, 2, 5);
 
 	float mAngle = 0;
-	float mTranslateX = 0;
+	vec3 mTranslate = vec3(1);
 
 	Material mMaterial;
 
 	glm::mat4 mView = glm::mat4(1);
+	
+	std::vector<unsigned int> triangulate(std::vector<unsigned int> indices, int vpf);
 
-	void computeNormals();
+	virtual void computeNormals();
 	static std::vector<glm::vec3> computeNormals(std::vector<unsigned int> indices);
-
+	
 	void setPointOfInterest(vec3 pointOfInterest = vec3(0));
 
-	void prepareDraw(mat4 vp, bool rotation);
-	std::vector<unsigned int> triangulate(std::vector<unsigned int> indices, int vpf);
+	virtual void setUpData();
+	void setUpAttributes(mat4 vp, bool rotation);
+	virtual glm::mat4 getMatrixModel();
 
 public:
 	static GLuint sVBO;
 	static std::vector<GLfloat> vPositions;
+	static unsigned int sVertexCount;
 	static GLint sViewLocation;
 	static GLint sModelLocation;
 	static GLint sAmbientLocation;
@@ -57,13 +61,12 @@ public:
 		return mIndices;
 	}
 
-	void setInitialTransX(float x);
+	virtual void translate(vec3 translate);
 
 	void setMaterial(Material material) {
 		mMaterial = material;
 	}
 
-	void render(bool rotation);
-	void render(mat4 vp);
+	virtual void render(bool rotation);
 	virtual void render(mat4 vp, bool rotation);
 };

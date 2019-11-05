@@ -9,24 +9,18 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-uniform vec3 lightPos; 
-uniform vec3 viewPos; 
+uniform vec3 lightPos1, lightPos2, lightPos3;
+uniform vec3 viewPos;
 
 uniform vec3 ambientColor;
 uniform vec3 diffuseColor;
 uniform vec3 specularColor;
 uniform float shininess;
 
-void main()
-{
-	vec3 fPosition = vec3(model * vec4(vPosition, 1.0));
-    vec3 fNormal = mat3(transpose(inverse(model))) * vNormal;  
-    
-    gl_Position = projection * view * vec4(fPosition, 1.0);
-
+vec3 calcLight(vec3 fPosition, vec3 fNormal, vec3 lightPosition) {
 	// diffuse 
     vec3 norm = normalize(fNormal);
-    vec3 lightDir = normalize(lightPos - fPosition);
+    vec3 lightDir = normalize(lightPosition - fPosition);
     float lambertian = max(dot(norm, lightDir), 0.0);
     
     // specular
@@ -37,5 +31,22 @@ void main()
 		specular = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
 	}
         
-    fColor = vec4(ambientColor + lambertian * diffuseColor + specular * specularColor, 1.0);
+    return ambientColor + lambertian * diffuseColor + specular * specularColor;
+}
+
+void main()
+{
+	vec3 fPosition = vec3(model * vec4(vPosition, 1.0));
+    vec3 fNormal = mat3(transpose(inverse(model))) * vNormal;  
+    gl_Position = projection * view * vec4(fPosition, 1.0);
+
+	vec3 color = vec3(0);
+	color += calcLight(fPosition, fNormal, lightPos1);
+	if (lightPos2 != vec3(0)) {
+		color += calcLight(fPosition, fNormal, lightPos2);
+	}
+	if (lightPos3 != vec3(0)) {
+		color += calcLight(fPosition, fNormal, lightPos3);
+	}
+	fColor = vec4(color, 1.0);
 }

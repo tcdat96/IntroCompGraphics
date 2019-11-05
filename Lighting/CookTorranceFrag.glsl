@@ -7,7 +7,7 @@ out vec4 fragColor;
 in vec3 fNormal;  
 in vec3 fPosition;  
   
-uniform vec3 lightPos; 
+uniform vec3 lightPos1, lightPos2, lightPos3;
 uniform vec3 viewPos;
 
 uniform vec3 ambientColor;
@@ -19,11 +19,11 @@ const float F0 = 0.8;
 const float roughness = 0.1;
 const float k = 0.2;
 
-void main() {
+vec3 calcLight(vec3 lightPosition) {
 	float shiny = shininess;
 
     vec3 norm = normalize(fNormal);
-    vec3 lightDir = normalize(lightPos - fPosition);
+    vec3 lightDir = normalize(lightPosition - fPosition);
     float NdotL = max(0, dot(norm, lightDir));
 	vec3 viewDir = normalize(viewPos - fPosition);
 
@@ -53,5 +53,17 @@ void main() {
 
 		Rs = (F * D * G) / (PI * NdotL * NdotV);
 	}
-	fragColor = vec4(ambientColor + diffuseColor * NdotL + specularColor * NdotL * (k + Rs * (1.0 - k)), 1.0);
+	return ambientColor + diffuseColor * NdotL + specularColor * NdotL * (k + Rs * (1.0 - k));
+}
+
+void main() {
+	vec3 color = vec3(0);
+	color += calcLight(lightPos1);
+	if (lightPos2 != vec3(0)) {
+		color += calcLight(lightPos2);
+	}
+	if (lightPos3 != vec3(0)) {
+		color += calcLight(lightPos3);
+	}
+	fragColor = vec4(color, 1.0);
 }

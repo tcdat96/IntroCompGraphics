@@ -5,7 +5,7 @@
 class Sphere : public Solid {
 public:
 	Sphere(std::vector<unsigned int> indices) : Solid(indices) {
-		mMaterial = chrome;
+		mMaterial = yRubber;
 	}
 private:
 	typedef Solid super;
@@ -28,7 +28,7 @@ private:
 	glm::mat4 getMatrixModel() {
 		auto model = super::getMatrixModel();
 		if (mScale) {
-			float scale = 1.0f / 3;
+			float scale = 1.0f / 4;
 			model = glm::scale(model, vec3(scale, scale, scale));
 			mScale = false;
 		}

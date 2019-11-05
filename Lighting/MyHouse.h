@@ -41,7 +41,7 @@ public:
 		mIndices.insert(mIndices.end(), hexa.begin(), hexa.end());
 		computeNormals();
 
-		mMaterial = copper;
+		mMaterial = chrome;
 
 		Solid::sVertexCount += mIndices.size();
 

@@ -30,6 +30,9 @@
     <None Include="GouraudVertex.glsl">
       <Filter>Source Files\shaders</Filter>
     </None>
+    <None Include="CookTorranceFrag.glsl">
+      <Filter>Source Files\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ObjectManager.cpp">

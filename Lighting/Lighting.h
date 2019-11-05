@@ -25,7 +25,6 @@ using namespace std;
 #include <glfw/glfw3.h>
 GLFWwindow* window;
 
-
 // constant
 constexpr auto SCREEN_WIDTH = 1024;
 constexpr auto SCREEN_HEIGHT = 768;
@@ -34,6 +33,9 @@ constexpr const char* SHADER_VERTEX_PHONG = "PhongVertex.glsl";
 constexpr const char* SHADER_FRAG_PHONG = "PhongFrag.glsl";
 constexpr const char* SHADER_VERTEX_GOURAUD = "GouraudVertex.glsl";
 constexpr const char* SHADER_FRAG_GOURAUD = "GouraudFrag.glsl";
+
+constexpr const char* SHADER_VERTEX_COOK_TORRANCE = "PhongVertex.glsl";
+constexpr const char* SHADER_FRAG_COOK_TORRANCE = "CookTorranceFrag.glsl";
 
 enum class TranslateMode {NONE, AUTO, DRAGGING};
 

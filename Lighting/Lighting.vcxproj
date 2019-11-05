@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="CookTorranceFrag.glsl" />
     <None Include="PhongFrag.glsl" />
     <None Include="GouraudFrag.glsl" />
     <None Include="PhongVertex.glsl" />

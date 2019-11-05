@@ -11,7 +11,8 @@ GLint gProjectionLocation;
 bool gSunEffect = false;
 GLint gLightLocation;
 
-bool gUsePhongShading = true;
+bool gUseGouraudShading = false;
+bool gUseCookLightModel = false;
 
 int main(void)
 {
@@ -105,7 +106,7 @@ void setUpLight() {
 	sSunAngle += 0.005f;
 	if (sSunAngle > M_PI * 2) sSunAngle = 0;
 
-	auto radius = 100.0f;
+	auto radius = 50.0f;
 	auto lightPos = glm::vec3(radius * cosf(sSunAngle), 0, radius * sinf(sSunAngle));
 	glUniform3f(gLightLocation, lightPos[0], lightPos[1], lightPos[2]);
 	gObjectManager->setLightPosition(lightPos[0], lightPos[1], lightPos[2]);
@@ -113,8 +114,15 @@ void setUpLight() {
 
 void setUpShaders() {
 	// vertex shader
-	gVertexProgram = gUsePhongShading ? initShaders(SHADER_VERTEX_PHONG, SHADER_FRAG_PHONG) :
-		initShaders(SHADER_VERTEX_GOURAUD, SHADER_FRAG_GOURAUD);
+	if (gUseCookLightModel) {
+		gVertexProgram = initShaders(SHADER_VERTEX_COOK_TORRANCE, SHADER_FRAG_COOK_TORRANCE);
+	}
+	else if (gUseGouraudShading) {
+		gVertexProgram = initShaders(SHADER_VERTEX_GOURAUD, SHADER_FRAG_GOURAUD);;
+	}
+	else {
+		gVertexProgram = initShaders(SHADER_VERTEX_PHONG, SHADER_FRAG_PHONG);
+	}
 	glUseProgram(gVertexProgram);
 
 	// position attribute
@@ -129,6 +137,9 @@ void setUpShaders() {
 
 	gProjectionLocation = getUniformLocation(gVertexProgram, "projection");
 	gLightLocation = getUniformLocation(gVertexProgram, "lightPos");
+
+	auto viewPosLocation = getUniformLocation(gVertexProgram, "viewPos");
+	glUniform3f(viewPosLocation, CAMERA[0], CAMERA[1], CAMERA[2]);
 
 	gObjectManager->setUniformLocations(
 		getUniformLocation(gVertexProgram, "model"),
@@ -176,8 +187,14 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		case GLFW_KEY_U:
 			gSunEffect = !gSunEffect;
 			break;
-		case GLFW_KEY_P:
-			gUsePhongShading = !gUsePhongShading;
+		case GLFW_KEY_G:
+			gUseGouraudShading = !gUseGouraudShading;
+			gUseCookLightModel = false;
+			setUpData();
+			break;
+		case GLFW_KEY_C:
+			gUseCookLightModel = !gUseCookLightModel;
+			gUseGouraudShading = false;
 			setUpData();
 			break;
 		case GLFW_KEY_1:

@@ -1,7 +1,7 @@
 #include "ObjectManager.h"
 
 glm::mat4 ObjectManager::sView = glm::lookAt(
-	vec3(40, 15, 40),
+	CAMERA,
 	vec3(TRANSLATE_DELTA * 4, 0, 0),
 	vec3(0, 1, 0)
 );
@@ -223,7 +223,7 @@ Solid* ObjectManager::generateSphere() {
 		indices.push_back(i + 1);
 	}
 
-	for (int i = 0; i < indices.size(); i++) {
+	for (unsigned int i = 0; i < indices.size(); i++) {
 		indices[i] += offset;
 	}
 	

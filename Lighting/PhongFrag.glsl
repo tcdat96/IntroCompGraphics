@@ -6,7 +6,7 @@ in vec3 fNormal;
 in vec3 fPosition;  
   
 uniform vec3 lightPos; 
-uniform vec3 viewPos; 
+uniform vec3 viewPos;
 
 uniform vec3 ambientColor;
 uniform vec3 diffuseColor;

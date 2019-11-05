@@ -8,7 +8,7 @@
 #include "Sphere.h"
 
 constexpr float TRANSLATE_DELTA = 6;
-
+constexpr glm::vec3 CAMERA = vec3(40, 15, 40);
 
 class ObjectManager {
 private:

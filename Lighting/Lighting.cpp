@@ -11,6 +11,8 @@ GLint gProjectionLocation;
 bool gSunEffect = false;
 GLint gLightLocation;
 
+bool gUsePhongShading = true;
+
 int main(void)
 {
 	if (setUpOpenGlComponents() == -1) {
@@ -111,7 +113,8 @@ void setUpLight() {
 
 void setUpShaders() {
 	// vertex shader
-	gVertexProgram = initShaders(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
+	gVertexProgram = gUsePhongShading ? initShaders(SHADER_VERTEX_PHONG, SHADER_FRAG_PHONG) :
+		initShaders(SHADER_VERTEX_GOURAUD, SHADER_FRAG_GOURAUD);
 	glUseProgram(gVertexProgram);
 
 	// position attribute
@@ -173,9 +176,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		case GLFW_KEY_U:
 			gSunEffect = !gSunEffect;
 			break;
-		case GLFW_KEY_G:
-			setUpProjection();
-			setUpLight();
+		case GLFW_KEY_P:
+			gUsePhongShading = !gUsePhongShading;
+			setUpData();
 			break;
 		case GLFW_KEY_1:
 		case GLFW_KEY_2:

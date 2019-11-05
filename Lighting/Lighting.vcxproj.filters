@@ -18,10 +18,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="fragShader.glsl">
+    <None Include="PhongFrag.glsl">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="vertexShader.glsl">
+    <None Include="GouraudFrag.glsl">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="PhongVertex.glsl">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="GouraudVertex.glsl">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

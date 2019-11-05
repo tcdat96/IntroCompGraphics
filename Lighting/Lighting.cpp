@@ -71,6 +71,7 @@ int setUpOpenGlComponents() {
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetScrollCallback(window, scrollCallback);
 
+	glewExperimental = GL_TRUE;
 	// GLEW
 	if (glewInit() != GLEW_OK) {
 		fprintf(stderr, "Failed to initialize GLEW\n");

@@ -72,6 +72,19 @@ void readScene(string filename) {
 	}
 }
 
+void exportPpm(Pixel** pixels, int xSize, int ySize) {
+	FILE* picfile = fopen("out.ppm", "w");
+	fprintf(picfile, "P6\n# %dx%d Raytracer output\n%d %d\n255\n",
+		xSize, ySize, xSize, ySize);
+	for (int j = ySize; j >= 0; j--) { // Y is flipped!
+		for (int i = 0; i < xSize; i++) {
+			fprintf(picfile, "%c%c%c", pixels[i][j].r, pixels[i][j].g, pixels[i][j].b);
+			// Remember though that this is a number between 0 and 255
+			// so might have to convert from 0-1.
+		}
+	}
+}
+
 void setView(float nPixel, float distance) {
 	d = distance;
 	pw = 2 * distance / nPixel;

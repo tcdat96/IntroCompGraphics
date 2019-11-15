@@ -7,17 +7,22 @@
 #include <string_view>
 
 #include "Utils.h"
+#include "Sphere.h"
+
+#include <vector>
+
+//#define DEBUG
 
 using namespace std;
 
-struct Pixel {
-	int r, g, b;
-};
+vec3 trace(Ray& ray);
+void findClosestIntersection(Ray& ray);
+vec3 shade(const Ray& ray);
 
-void readScene(string filename);
-void exportPpm(string filename);
+bool readScene(string filename);
+void exportPpm(vec3** pixels, int xSize, int ySize);
 
-void setView(float nPixel, float distance);
+void setView(int nPixel, float distance);
 void sphere();
 void scale(float sx, float sy, float sz);
 void move(float x, float y, float z);

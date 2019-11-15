@@ -1,13 +1,64 @@
 #include "RayTracer.h"
 
 float d;
-float pw;
+int n;
+float pSize;
 
-void main() {
-	readScene("SphereFlake1.scn");
+vec3 gBackground = vec3(0, 0, 0);
+Material gMaterial;
+
+vec3 gCamera(0, 0, 4);
+
+vector<Sphere*> gSpheres;
+vec3** gPixels = nullptr;
+
+int main() {
+	if (!readScene("SphereFlake.scn")) {
+		cout << "There was a problem reading scene file.";
+		return 0;
+	}
+
+	float halfSize = pSize / 2;
+	float iX = -d + halfSize;
+	float iY = d - halfSize;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			Ray ray(gCamera);
+			ray.v = vec3(iX + i * pSize, iY - j * pSize, 0) - gCamera;
+			gPixels[i][j] = trace(ray);
+		}
+	}
+
+	exportPpm(gPixels, n, n);
+
+	for (auto sphere : gSpheres) {
+		delete sphere;
+	}
+
+	return 1;
 }
 
-void readScene(string filename) {
+vec3 trace(Ray& ray) {
+	findClosestIntersection(ray);
+	return ray.sphere != nullptr ? shade(ray) : gBackground;
+}
+
+void findClosestIntersection(Ray& ray) {
+	for (auto sphere : gSpheres) {
+		float t = sphere->findIntersection(ray);
+		if (t < 0) continue;
+		if (t < ray.t) {
+			ray.t = t;
+			ray.sphere = sphere;
+		}
+	}
+}
+
+vec3 shade(const Ray& ray) {
+	return ray.sphere->getMaterial().diffuse;
+}
+
+bool readScene(string filename) {
 	ifstream infile(filename);
 	string line;
 	float r, g, b, x, y, z;
@@ -26,7 +77,8 @@ void readScene(string filename) {
 
 		}
 		else if (startsWith(line, "view")) {
-			float n, d;
+			int n;
+			float d;
 			iss >> n >> d;
 			setView(n, d);
 		}
@@ -70,29 +122,60 @@ void readScene(string filename) {
 			refraction(r, g, b, i);
 		}
 	}
+
+	return gPixels != nullptr;
 }
 
-void exportPpm(Pixel** pixels, int xSize, int ySize) {
-	FILE* picfile = fopen("out.ppm", "w");
-	fprintf(picfile, "P6\n# %dx%d Raytracer output\n%d %d\n255\n",
+void exportPpm(vec3** pixels, int xSize, int ySize) {
+	FILE* ppm;
+	fopen_s(&ppm, "out.ppm", "wb");
+	if (ppm == nullptr) {
+		cout << "There was a problem opening out.ppm" << endl;
+		exit(0);
+	}
+
+	fprintf(ppm, "P6\n# %dx%d Raytracer output\n%d %d\n255\n",
 		xSize, ySize, xSize, ySize);
-	for (int j = ySize; j >= 0; j--) { // Y is flipped!
+	for (int j = ySize - 1; j >= 0; j--) { // Y is flipped!
 		for (int i = 0; i < xSize; i++) {
-			fprintf(picfile, "%c%c%c", pixels[i][j].r, pixels[i][j].g, pixels[i][j].b);
-			// Remember though that this is a number between 0 and 255
-			// so might have to convert from 0-1.
+			int r = pixels[i][j][0] * 255;
+			int g = pixels[i][j][1] * 255;
+			int b = pixels[i][j][2] * 255;
+			//cout << r << " " << g << " " << b << endl;
+			fprintf(ppm, "%c%c%c", r, g, b);
 		}
+	}
+
+	fclose(ppm);
+
+#ifdef DEBUG
+	cout << "\n\n\n";
+	ifstream infile("out.ppm");
+	string line;
+	while (getline(infile, line)) {
+		cout << line << endl;
+	}
+#endif
+}
+
+void setView(int nPixel, float distance) {
+	if (nPixel <= 0 || distance <= 0) {
+		return;
+	}
+
+	d = distance;
+	n = nPixel;
+	pSize = 2 * distance / nPixel;
+
+	gPixels = new vec3 * [n];
+	for (int i = 0; i < n; i++) {
+		gPixels[i] = new vec3[n];
 	}
 }
 
-void setView(float nPixel, float distance) {
-	d = distance;
-	pw = 2 * distance / nPixel;
-	cout << "view d:  " << d << "\tpw: " << pw << endl;
-}
-
 void sphere() {
-	cout << "sphere\n";
+	Sphere* sphere = new Sphere(gMaterial);
+	gSpheres.push_back(sphere);
 }
 
 void scale(float sx, float sy, float sz) {
@@ -113,7 +196,7 @@ void light(float r, float g, float b, float x, float y, float z) {
 }
 
 void background(float r, float g, float b) {
-	cout << "background: " << r << " " << g << " " << b << endl;
+	gBackground = vec3(r, g, b);
 }
 
 void ambient(float r, float g, float b) {

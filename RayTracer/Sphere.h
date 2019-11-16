@@ -19,27 +19,27 @@ private:
 public:
 	Sphere(Material material) {
 		mMaterial = material;
+		mMaterial = yRubber;
 	}
 
 	Material getMaterial() {
 		return mMaterial;
 	}
 
-	float findIntersection(const Ray& ray) {
-		vec3 u = ray.u;
-		vec3 v = ray.v;
+	double findIntersection(const Ray& ray) {
+		dvec3 u = ray.u;
+		dvec3 v = ray.v;
 
-		float a = glm::dot(v, v);
-		float b = 2 * glm::dot(u, v);
-		float c = glm::dot(u, u) - 1;
-		float delta = b * b - 4 * a * c;
-
+		double a = glm::dot(v, v);
+		double b = 2 * glm::dot(u, v);
+		double c = glm::dot(u, u) - 1;
+		double delta = b * b - 4 * a * c;
 
 		if (delta < 0) return -1;
-		float root = sqrt(delta);
-		float t0 = 0.5f * (float(-b) - root) / a;
+		double root = sqrt(delta);
+		double t0 = 0.5 * (-b - root) / a;
 		if (t0 >= 0) return t0;
-		float t1 = 0.5f * (float(-b) + root) / a;
+		double t1 = 0.5 * (-b + root) / a;
 		return t1 >= 0 ? t1 : -1;
 	}
 };

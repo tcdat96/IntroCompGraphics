@@ -9,21 +9,27 @@ struct Pixel {
 };
 
 struct Ray {
-	vec3 u;
-	vec3 v;
+	dvec3 u;
+	dvec3 v;
 	Sphere* sphere = nullptr;
-	float t = FLT_MAX;
-	Ray(vec3 u) : u(u) {}
+	double t = DBL_MAX;
+	Ray(dvec3 u) : u(u) {}
+};
+
+struct Light {
+	dvec3 position;
+	dvec3 color;
+	Light(dvec3 position, dvec3 color) : position(position), color(color) {}
 };
 
 struct Material {
 	// cyan plastic
-	vec3 ambient = vec3(0, 0.1, 0.06);
-	vec3 diffuse = vec3(0, 0.50980392, 0.50980392);
-	vec3 specular = vec3(0.50196078, 0.50196078, 0.50196078);
-	float shininess = 32;
+	dvec3 ambient = dvec3(0, 0.1, 0.06);
+	dvec3 diffuse = dvec3(0, 0.50980392, 0.50980392);
+	dvec3 specular = dvec3(0.50196078, 0.50196078, 0.50196078);
+	double shininess = 32;
 	Material() {}
-	Material(vec3 ambient, vec3 diffuse, vec3 specular, float shininess)
+	Material(dvec3 ambient, dvec3 diffuse, dvec3 specular, double shininess)
 		: ambient(ambient), diffuse(diffuse), specular(specular), shininess(shininess) {}
 };
 

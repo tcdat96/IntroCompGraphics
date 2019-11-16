@@ -4,13 +4,15 @@ float d;
 int n;
 float pSize;
 
-vec3 gBackground = vec3(0, 0, 0);
+dvec3 gBackground = vec3(0, 0, 0);
 Material gMaterial;
 
 vec3 gCamera(0, 0, 4);
 
 vector<Sphere*> gSpheres;
-vec3** gPixels = nullptr;
+dvec3** gPixels = nullptr;
+
+vector<Light> gLights;
 
 int main() {
 	if (!readScene("SphereFlake.scn")) {
@@ -38,14 +40,14 @@ int main() {
 	return 1;
 }
 
-vec3 trace(Ray& ray) {
+dvec3 trace(Ray& ray) {
 	findClosestIntersection(ray);
 	return ray.sphere != nullptr ? shade(ray) : gBackground;
 }
 
 void findClosestIntersection(Ray& ray) {
 	for (auto sphere : gSpheres) {
-		float t = sphere->findIntersection(ray);
+		double t = sphere->findIntersection(ray);
 		if (t < 0) continue;
 		if (t < ray.t) {
 			ray.t = t;
@@ -54,10 +56,36 @@ void findClosestIntersection(Ray& ray) {
 	}
 }
 
-vec3 shade(const Ray& ray) {
-	return ray.sphere->getMaterial().diffuse;
+dvec3 shade(const Ray& ray) {
+	dvec3 color = gBackground;
+	dvec3 p = ray.u + ray.v * ray.t;
+	for (Light light : gLights) {
+		color += PhongIllumination(p, ray, light);
+	}
+	return color;
 }
 
+dvec3 PhongIllumination(dvec3 position, const Ray& ray, Light light) {
+	Material material = ray.sphere->getMaterial();
+	
+	// diffuse
+	dvec3 normal = glm::normalize(position);
+	dvec3 lightDir = glm::normalize(dvec3(light.position) - position);
+	double lambertian = max(glm::dot(normal, lightDir), 0.0);
+
+	// specular
+	double specular = 0;
+	if (lambertian > 0) {
+		dvec3 viewDir = glm::normalize(-ray.v);
+		dvec3 reflectDir = glm::reflect(-lightDir, normal);
+		specular = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+	}
+
+	dvec3 color = material.ambient + lambertian * material.diffuse + specular * material.specular;
+	return color * light.color;
+}
+
+// scene
 bool readScene(string filename) {
 	ifstream infile(filename);
 	string line;
@@ -126,7 +154,7 @@ bool readScene(string filename) {
 	return gPixels != nullptr;
 }
 
-void exportPpm(vec3** pixels, int xSize, int ySize) {
+void exportPpm(dvec3** pixels, int xSize, int ySize) {
 	FILE* ppm;
 	fopen_s(&ppm, "out.ppm", "wb");
 	if (ppm == nullptr) {
@@ -138,9 +166,9 @@ void exportPpm(vec3** pixels, int xSize, int ySize) {
 		xSize, ySize, xSize, ySize);
 	for (int j = ySize - 1; j >= 0; j--) { // Y is flipped!
 		for (int i = 0; i < xSize; i++) {
-			int r = pixels[i][j][0] * 255;
-			int g = pixels[i][j][1] * 255;
-			int b = pixels[i][j][2] * 255;
+			int r = int(pixels[i][j][0] * 255);
+			int g = int(pixels[i][j][1] * 255);
+			int b = int(pixels[i][j][2] * 255);
 			//cout << r << " " << g << " " << b << endl;
 			fprintf(ppm, "%c%c%c", r, g, b);
 		}
@@ -167,9 +195,9 @@ void setView(int nPixel, float distance) {
 	n = nPixel;
 	pSize = 2 * distance / nPixel;
 
-	gPixels = new vec3 * [n];
+	gPixels = new dvec3 * [n];
 	for (int i = 0; i < n; i++) {
-		gPixels[i] = new vec3[n];
+		gPixels[i] = new dvec3[n];
 	}
 }
 
@@ -191,8 +219,8 @@ void rotate(float angle, float x, float y, float z) {
 }
 
 void light(float r, float g, float b, float x, float y, float z) {
-	cout << "light: " << r << " " << g << " " << b 
-		<< x << " " << y << " " << z << endl;
+	Light light(vec3(x, y, z), vec3(r, g, b));
+	gLights.push_back(light);
 }
 
 void background(float r, float g, float b) {

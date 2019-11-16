@@ -15,12 +15,13 @@
 
 using namespace std;
 
-vec3 trace(Ray& ray);
+dvec3 trace(Ray& ray);
 void findClosestIntersection(Ray& ray);
-vec3 shade(const Ray& ray);
+dvec3 shade(const Ray& ray);
+dvec3 PhongIllumination(dvec3 position, const Ray& ray, Light light);
 
 bool readScene(string filename);
-void exportPpm(vec3** pixels, int xSize, int ySize);
+void exportPpm(dvec3** pixels, int xSize, int ySize);
 
 void setView(int nPixel, float distance);
 void sphere();

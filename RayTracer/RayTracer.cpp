@@ -65,9 +65,22 @@ dvec3 shade(const Ray& ray) {
 	dvec3 color = gAmbient;
 	dvec3 p = ray.u + ray.v * ray.t;
 	for (Light light : gLights) {
+		if (isShadow(p, ray, light)) continue;
 		color += PhongIllumination(p, ray, light);
 	}
 	return color;
+}
+
+bool isShadow(dvec3 hitPoint, const Ray& ray, Light light) {
+	Ray shadowRay(hitPoint, light.position - hitPoint);
+	for (auto sphere : gSpheres) {
+		if (sphere == ray.sphere) continue;
+		double t = sphere->findIntersection(shadowRay);
+		if (t >= 0) {
+			return true;
+		}
+	}
+	return false;
 }
 
 dvec3 PhongIllumination(dvec3 hitPoint, const Ray& ray, Light light) {

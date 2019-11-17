@@ -18,6 +18,7 @@ using namespace std;
 dvec3 trace(Ray& ray);
 void findClosestIntersection(Ray& ray);
 dvec3 shade(const Ray& ray);
+bool isShadow(dvec3 hitPoint, const Ray& ray, Light light);
 dvec3 PhongIllumination(dvec3 position, const Ray& ray, Light light);
 
 bool readScene(string filename);

@@ -14,6 +14,7 @@ struct Ray {
 	Sphere* sphere = nullptr;
 	double t = DBL_MAX;
 	Ray(dvec3 u) : u(u) {}
+	Ray(dvec3 u, dvec3 v) : u(u), v(v) {}
 };
 
 struct Light {

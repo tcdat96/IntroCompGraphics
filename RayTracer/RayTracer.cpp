@@ -2,31 +2,36 @@
 
 float d;
 int n;
-float pSize;
+
+vec3 gCamera(0, 0, 1);
 
 dvec3 gBackground = vec3(0, 0, 0);
-Material gMaterial;
+vector<Light> gLights;
+dvec3 gAmbient;
 
-vec3 gCamera(0, 0, 4);
-
+vector<Group> gGroups;
 vector<Sphere*> gSpheres;
 dvec3** gPixels = nullptr;
 
-vector<Light> gLights;
+
 
 int main() {
-	if (!readScene("SphereFlake.scn")) {
+	if (!readScene("SphereFlake1.scn")) {
 		cout << "There was a problem reading scene file.";
 		return 0;
 	}
 
+	float pSize = 2 * d / n;
 	float halfSize = pSize / 2;
 	float iX = -d + halfSize;
 	float iY = d - halfSize;
+	float scale = glm::tan(glm::radians(60.0));
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
 			Ray ray(gCamera);
-			ray.v = vec3(iX + i * pSize, iY - j * pSize, 0) - gCamera;
+			float x = iX + j * pSize;
+			float y = iY - i * pSize;
+			ray.v = vec3(x * scale, y * scale, 0) - gCamera;
 			gPixels[i][j] = trace(ray);
 		}
 	}
@@ -42,7 +47,7 @@ int main() {
 
 dvec3 trace(Ray& ray) {
 	findClosestIntersection(ray);
-	return ray.sphere != nullptr ? shade(ray) : gBackground;
+	return ray.sphere != nullptr && !gLights.empty() ? shade(ray) : gBackground;
 }
 
 void findClosestIntersection(Ray& ray) {
@@ -57,7 +62,7 @@ void findClosestIntersection(Ray& ray) {
 }
 
 dvec3 shade(const Ray& ray) {
-	dvec3 color = gBackground;
+	dvec3 color = gAmbient;
 	dvec3 p = ray.u + ray.v * ray.t;
 	for (Light light : gLights) {
 		color += PhongIllumination(p, ray, light);
@@ -65,12 +70,13 @@ dvec3 shade(const Ray& ray) {
 	return color;
 }
 
-dvec3 PhongIllumination(dvec3 position, const Ray& ray, Light light) {
+dvec3 PhongIllumination(dvec3 hitPoint, const Ray& ray, Light light) {
 	Material material = ray.sphere->getMaterial();
 	
 	// diffuse
-	dvec3 normal = glm::normalize(position);
-	dvec3 lightDir = glm::normalize(dvec3(light.position) - position);
+	dvec3 center = ray.sphere->getXfm() * vec4(0, 0, 0, 1);
+	dvec3 normal = glm::normalize(hitPoint - center);
+	dvec3 lightDir = glm::normalize(light.position - hitPoint);
 	double lambertian = max(glm::dot(normal, lightDir), 0.0);
 
 	// specular
@@ -81,12 +87,14 @@ dvec3 PhongIllumination(dvec3 position, const Ray& ray, Light light) {
 		specular = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 	}
 
-	dvec3 color = material.ambient + lambertian * material.diffuse + specular * material.specular;
+	dvec3 color = lambertian * material.diffuse + specular * material.specular;
 	return color * light.color;
 }
 
 // scene
 bool readScene(string filename) {
+	gGroups.push_back(Group());
+
 	ifstream infile(filename);
 	string line;
 	float r, g, b, x, y, z;
@@ -99,10 +107,10 @@ bool readScene(string filename) {
 			// comment, do nothing
 		}
 		else if (startsWith(line, "group")) {
-
+			gGroups.push_back(Group(gGroups.back()));
 		}
 		else if (startsWith(line, "groupend")) {
-
+			gGroups.pop_back();
 		}
 		else if (startsWith(line, "view")) {
 			int n;
@@ -164,14 +172,16 @@ void exportPpm(dvec3** pixels, int xSize, int ySize) {
 
 	fprintf(ppm, "P6\n# %dx%d Raytracer output\n%d %d\n255\n",
 		xSize, ySize, xSize, ySize);
-	for (int j = ySize - 1; j >= 0; j--) { // Y is flipped!
-		for (int i = 0; i < xSize; i++) {
-			int r = int(pixels[i][j][0] * 255);
-			int g = int(pixels[i][j][1] * 255);
-			int b = int(pixels[i][j][2] * 255);
-			//cout << r << " " << g << " " << b << endl;
+	//for (int j = ySize - 1; j >= 0; j--) { // Y is flipped!
+	for (int i = 0; i < xSize; i++) {
+		for (int j = 0; j < ySize; j++) {
+			int r = int(min(pixels[i][j][0], 1.0) * 255);
+			int g = int(min(pixels[i][j][1], 1.0) * 255);
+			int b = int(min(pixels[i][j][2], 1.0) * 255);
+			//cout << (pixels[i][j][0] == 0.0 ? 1 : 0) << " ";
 			fprintf(ppm, "%c%c%c", r, g, b);
 		}
+		//cout << endl;
 	}
 
 	fclose(ppm);
@@ -193,7 +203,6 @@ void setView(int nPixel, float distance) {
 
 	d = distance;
 	n = nPixel;
-	pSize = 2 * distance / nPixel;
 
 	gPixels = new dvec3 * [n];
 	for (int i = 0; i < n; i++) {
@@ -202,24 +211,33 @@ void setView(int nPixel, float distance) {
 }
 
 void sphere() {
-	Sphere* sphere = new Sphere(gMaterial);
+	Group group = gGroups.back();
+	Sphere* sphere = new Sphere(group.xfm, group.material);
 	gSpheres.push_back(sphere);
 }
 
+void addTransformation(mat4 xfm) {
+	Group& group = gGroups.back();
+	group.xfm = group.xfm * xfm;
+}
+
 void scale(float sx, float sy, float sz) {
-	cout << "scale: " << sx << " " << sy << " " << sz << endl;
+	mat4 xfm = glm::scale(mat4(1), vec3(sx, sy, sz));
+	addTransformation(xfm);
 }
 
 void move(float x, float y, float z) {
-	cout << "move: " << x << " " << y << " " << z << endl;
+	mat4 xfm = glm::translate(mat4(1), vec3(x, y, z));
+	addTransformation(xfm);
 }
 
 void rotate(float angle, float x, float y, float z) {
-	cout << "rotate: " << angle << " " << x << " " << y << " " << z << endl;
+	//mat4 xfm = glm::rotate(mat4(1), angle, vec3(x, y, z));
+	//addTransformation(xfm);
 }
 
 void light(float r, float g, float b, float x, float y, float z) {
-	Light light(vec3(x, y, z), vec3(r, g, b));
+	Light light(dvec3(x, y, z), dvec3(r, g, b));
 	gLights.push_back(light);
 }
 
@@ -228,12 +246,12 @@ void background(float r, float g, float b) {
 }
 
 void ambient(float r, float g, float b) {
-	cout << "ambient: " << r << " " << g << " " << b << endl;
+	gAmbient = dvec3(r, g, b);
 }
 
 void material(float dr, float dg, float db, float sr, float sg, float sb, float p) {
-	cout << "material: " << dr << " " << dg << " " << db 
-		<< sr << " " << sg << " " << sb << endl;
+	Material material = Material(dvec3(dr, dg, db), dvec3(sr, sg, sb), p);
+	gGroups.back().material = material;
 }
 
 void refraction(float r, float g, float b, float i) {

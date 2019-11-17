@@ -15,11 +15,17 @@ using namespace glm;
 class Sphere
 {
 private:
+	mat4 mXfm;
+	mat4 mXfmInverse;
 	Material mMaterial;
 public:
-	Sphere(Material material) {
-		mMaterial = material;
-		mMaterial = yRubber;
+	Sphere(mat4 xfm, Material material): mMaterial(material) {
+		mXfm = xfm;
+		mXfmInverse = glm::inverse(xfm);
+	}
+
+	mat4 getXfm() {
+		return mXfm;
 	}
 
 	Material getMaterial() {
@@ -27,8 +33,8 @@ public:
 	}
 
 	double findIntersection(const Ray& ray) {
-		dvec3 u = ray.u;
-		dvec3 v = ray.v;
+		dvec3 u = mXfmInverse * dvec4(ray.u, 1.0);
+		dvec3 v = mXfmInverse * dvec4(ray.v, 0.0);
 
 		double a = glm::dot(v, v);
 		double b = 2 * glm::dot(u, v);

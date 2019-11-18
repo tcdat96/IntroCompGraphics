@@ -45,9 +45,19 @@ struct Material {
 	dvec3 diffuse = dvec3(0, 0.50980392, 0.50980392);
 	dvec3 specular = dvec3(0.50196078, 0.50196078, 0.50196078);
 	double shininess = 32;
+	double kr = 0;
+	bool procTexture = false;
 	Material() {}
-	Material(dvec3 diffuse, dvec3 specular, double shininess)
-		: diffuse(diffuse), specular(specular), shininess(shininess) {}
+	Material(dvec3 diffuse, dvec3 specular, double shininess, double kr)
+		: diffuse(diffuse), specular(specular), shininess(shininess), kr(kr) {}
+	dvec3 getDiffuse(dvec3 hitPoint) {
+		if (procTexture) {
+			double pattern = 2 * 3.14 * 5;
+			pattern = (cos(hitPoint[1] * pattern) * sin(hitPoint[0] * pattern) + 1) * 0.5;
+			return diffuse * pattern;
+		}
+		return diffuse;
+	}
 };
 
 struct Group {

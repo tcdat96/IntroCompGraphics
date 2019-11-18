@@ -87,9 +87,10 @@ dvec3 shade(const Ray& ray, Surface* surface) {
 	}
 
 	// reflection
-	if (surface->sphere->isReflected() && ray.depth < MAX_RAY_DEPTH) {
+	auto sphere = surface->sphere;
+	if (sphere->isReflected() && ray.depth < MAX_RAY_DEPTH) {
 		Ray reflect(p, glm::reflect(ray.v, surface->normal), ray.depth + 1);
-		color += 0.2 * trace(reflect);
+		color += sphere->getMaterial().kr * trace(reflect);
 	}
 
 	// refraction
@@ -128,7 +129,7 @@ dvec3 PhongIllumination(const Ray& ray, Surface* surface, const Light& light) {
 		specular = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 	}
 
-	dvec3 color = lambertian * material.diffuse + specular * material.specular;
+	dvec3 color = lambertian * material.getDiffuse(surface->hitPoint) + specular * material.specular;
 	return color * light.color;
 }
 
@@ -147,11 +148,11 @@ bool readScene(string filename) {
 		if (line[0] == '#') {
 			// comment, do nothing
 		}
-		else if (startsWith(line, "group")) {
-			gGroups.push_back(Group(gGroups.back()));
-		}
 		else if (startsWith(line, "groupend")) {
 			gGroups.pop_back();
+		}
+		else if (startsWith(line, "group")) {
+			gGroups.push_back(Group(gGroups.back()));
 		}
 		else if (startsWith(line, "view")) {
 			int n;
@@ -189,14 +190,19 @@ bool readScene(string filename) {
 			ambient(r, g, b);
 		}
 		else if (startsWith(line, "material")) {
-			float dr, dg, db, sr, sg, sb, p;
-			iss >> dr >> dg >> db >> sr >> sg >> sb >> p;
-			material(dr, dg, db, sr, sg, sb, p);
+			float dr, dg, db, sr, sg, sb, p, kr = 0;
+			iss >> dr >> dg >> db >> sr >> sg >> sb >> p >> kr;
+			material(dr, dg, db, sr, sg, sb, p, kr);
 		}
 		else if (startsWith(line, "refraction")) {
 			float i;
 			iss >> r >> g >> b >> i;
 			refraction(r, g, b, i);
+		}
+		else if (startsWith(line, "texture")) {
+			int mode;
+			iss >> mode;
+			texture(mode);
 		}
 	}
 
@@ -290,12 +296,25 @@ void ambient(float r, float g, float b) {
 	gAmbient = dvec3(r, g, b);
 }
 
-void material(float dr, float dg, float db, float sr, float sg, float sb, float p) {
-	Material material(dvec3(dr, dg, db), dvec3(sr, sg, sb), p);
-	gGroups.back().material = material;
+void material(float dr, float dg, float db, float sr, float sg, float sb, float p, float kr) {
+	Material material(dvec3(dr, dg, db), dvec3(sr, sg, sb), p, kr);
+	Group& group = gGroups.back();
+	material.procTexture = group.material.procTexture;
+	group.material = material;
 }
 
 void refraction(float r, float g, float b, float i) {
 	Group& group = gGroups.back();
 	group.refraction = Refraction(dvec3(r, g, b), i);
+}
+
+void texture(int mode) {
+	switch (mode) {
+	case 0:
+		gGroups.back().material.procTexture = false;
+		break;
+	case 1:
+		gGroups.back().material.procTexture = true;
+		break;
+	}
 }

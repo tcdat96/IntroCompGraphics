@@ -34,5 +34,6 @@ void rotate(float angle, float x, float y, float z);
 void light(float r, float g, float b, float x, float y, float z);
 void background(float r, float g, float b);
 void ambient(float r, float g, float b);
-void material(float dr, float dg, float db, float sr, float sg, float sb, float p);
+void material(float dr, float dg, float db, float sr, float sg, float sb, float p, float kr);
 void refraction(float r, float g, float b, float i);
+void texture(int mode);

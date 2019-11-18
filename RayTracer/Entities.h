@@ -32,6 +32,13 @@ struct Light {
 	Light(dvec3 position, dvec3 color) : position(position), color(color) {}
 };
 
+struct Refraction {
+	dvec3 color;
+	double eta = 1;
+	Refraction() {}
+	Refraction(dvec3 color, double eta) : color(color), eta(eta) {}
+};
+
 struct Material {
 	// cyan plastic
 	dvec3 ambient = dvec3(0, 0.1, 0.06);
@@ -45,6 +52,7 @@ struct Material {
 
 struct Group {
 	Material material;
+	Refraction refraction;
 	mat4 xfm = mat4(1);
 	Group() {}
 	Group(const Group& group) : material(group.material), xfm(mat4(group.xfm)) {}

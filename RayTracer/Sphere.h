@@ -17,9 +17,11 @@ class Sphere
 private:
 	mat4 mXfm;
 	mat4 mXfmInverse;
+
 	Material mMaterial;
+	Refraction mRefraction;
 public:
-	Sphere(mat4 xfm, Material material): mMaterial(material) {
+	Sphere(mat4 xfm, Material material, Refraction refraction): mMaterial(material), mRefraction(refraction) {
 		mXfm = xfm;
 		mXfmInverse = glm::inverse(xfm);
 	}
@@ -30,6 +32,10 @@ public:
 
 	Material getMaterial() {
 		return mMaterial;
+	}
+
+	Refraction getRefraction() {
+		return mRefraction;
 	}
 
 	bool isReflected() {

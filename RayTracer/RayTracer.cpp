@@ -92,6 +92,13 @@ dvec3 shade(const Ray& ray, Surface* surface) {
 		color += 0.2 * trace(reflect);
 	}
 
+	// refraction
+	//auto refraction = surface->sphere->getRefraction();
+	//if (abs(refraction.eta - 1) > 0.00000001) {
+	//	Ray refract(surface->hitPoint - surface->normal * 0.1, glm::refract(ray.v, surface->normal, refraction.eta));
+	//	color += refraction.color * trace(refract);
+	//}
+
 	return color;
 }
 
@@ -245,8 +252,8 @@ void setView(int nPixel, float distance) {
 }
 
 void sphere() {
-	Group group = gGroups.back();
-	Sphere* sphere = new Sphere(group.xfm, group.material);
+	Group& group = gGroups.back();
+	Sphere* sphere = new Sphere(group.xfm, group.material, group.refraction);
 	gSpheres.push_back(sphere);
 }
 
@@ -284,10 +291,11 @@ void ambient(float r, float g, float b) {
 }
 
 void material(float dr, float dg, float db, float sr, float sg, float sb, float p) {
-	Material material = Material(dvec3(dr, dg, db), dvec3(sr, sg, sb), p);
+	Material material(dvec3(dr, dg, db), dvec3(sr, sg, sb), p);
 	gGroups.back().material = material;
 }
 
 void refraction(float r, float g, float b, float i) {
-	cout << "refraction: " << r << " " << g << " " << b << " " << i << endl;
+	Group& group = gGroups.back();
+	group.refraction = Refraction(dvec3(r, g, b), i);
 }

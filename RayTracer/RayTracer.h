@@ -17,11 +17,11 @@ const short MAX_RAY_DEPTH = 2;
 
 using namespace std;
 
-dvec3 trace(Ray& ray);
-void findClosestIntersection(Ray& ray);
-dvec3 shade(Ray& ray);
-bool isShadow(dvec3 hitPoint, const Ray& ray, Light light);
-dvec3 PhongIllumination(dvec3 hitPoint, dvec3 normal, const Ray& ray, Light light);
+dvec3 trace(const Ray& ray);
+Surface* findClosestIntersection(const Ray& ray);
+dvec3 shade(const Ray& ray, Surface* surface);
+bool isShadow(dvec3 hitPoint, const Light& light);
+dvec3 PhongIllumination(const Ray& ray, Surface* surface, const Light& light);
 
 bool readScene(string filename);
 void exportPpm(dvec3** pixels, int xSize, int ySize);

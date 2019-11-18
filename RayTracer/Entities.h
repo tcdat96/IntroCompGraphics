@@ -11,11 +11,19 @@ struct Pixel {
 struct Ray {
 	dvec3 u;
 	dvec3 v;
-	Sphere* sphere = nullptr;
-	double t = DBL_MAX;
 	short depth = 0;
 	Ray(dvec3 u) : u(u) {}
 	Ray(dvec3 u, dvec3 v, int depth = 0) : u(u), v(v), depth(depth) {}
+};
+
+struct Surface {
+	dvec3 hitPoint;
+	dvec3 normal;
+	Sphere* sphere = nullptr;
+	Surface(dvec3 hitPoint, dvec3 normal, Sphere* sphere) : hitPoint(hitPoint), normal(normal), sphere(sphere) {}
+	dvec3 adjustedHitPoint() {
+		return hitPoint + normal * 0.01;
+	}
 };
 
 struct Light {

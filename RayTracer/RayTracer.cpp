@@ -45,47 +45,59 @@ int main() {
 	return 1;
 }
 
-dvec3 trace(Ray& ray) {
-	findClosestIntersection(ray);
-	return ray.sphere != nullptr && !gLights.empty() ? shade(ray) : gBackground;
+dvec3 trace(const Ray& ray) {
+	Surface* surface = findClosestIntersection(ray);
+	if (surface != nullptr) {
+		dvec3 color = !gLights.empty() ? shade(ray, surface) : gBackground;
+		delete surface;
+		return color;
+	}
+	return gBackground;
 }
 
-void findClosestIntersection(Ray& ray) {
+Surface* findClosestIntersection(const Ray& ray) {
+	double tNear = DBL_MAX;
+	Sphere* sphereNear = nullptr;
 	for (auto sphere : gSpheres) {
 		double t = sphere->findIntersection(ray);
 		if (t < 0) continue;
-		if (t < ray.t) {
-			ray.t = t;
-			ray.sphere = sphere;
+		if (t < tNear) {
+			tNear = t;
+			sphereNear = sphere;
 		}
 	}
+
+	if (sphereNear != nullptr) {
+		dvec3 p = ray.u + ray.v * tNear;
+		dvec3 normal = sphereNear->computeNormal(p);
+		return new Surface(p, normal, sphereNear);
+	}
+	return nullptr;
 }
 
-dvec3 shade(Ray& ray) {
+dvec3 shade(const Ray& ray, Surface* surface) {
 	dvec3 color = gAmbient;
 
-	dvec3 p = ray.u + ray.v * ray.t;
-	dvec3 center = ray.sphere->getXfm() * vec4(0, 0, 0, 1);
-	dvec3 normal = glm::normalize(p - center);
+	// workaround for cancer
+	auto p = surface->adjustedHitPoint();
 
 	for (Light light : gLights) {
-		if (isShadow(p, ray, light)) continue;
-		color += PhongIllumination(p, normal, ray, light);
+		if (isShadow(p, light)) continue;
+		color += PhongIllumination(ray, surface, light);
 	}
 
 	// reflection
-	if (ray.sphere->isReflected() && ray.depth < MAX_RAY_DEPTH) {
-		Ray reflect(p + normal * 0.1, glm::reflect(ray.v, normal), ray.depth + 1);
+	if (surface->sphere->isReflected() && ray.depth < MAX_RAY_DEPTH) {
+		Ray reflect(p, glm::reflect(ray.v, surface->normal), ray.depth + 1);
 		color += 0.2 * trace(reflect);
 	}
 
 	return color;
 }
 
-bool isShadow(dvec3 hitPoint, const Ray& ray, Light light) {
+bool isShadow(dvec3 hitPoint, const Light& light) {
 	Ray shadowRay(hitPoint, light.position - hitPoint);
 	for (auto sphere : gSpheres) {
-		if (sphere == ray.sphere) continue;
 		double t = sphere->findIntersection(shadowRay);
 		if (t >= 0) {
 			return true;
@@ -94,19 +106,18 @@ bool isShadow(dvec3 hitPoint, const Ray& ray, Light light) {
 	return false;
 }
 
-dvec3 PhongIllumination(dvec3 hitPoint, dvec3 normal, const Ray& ray, Light light) {
-	Material material = ray.sphere->getMaterial();
+dvec3 PhongIllumination(const Ray& ray, Surface* surface, const Light& light) {
+	Material material = surface->sphere->getMaterial();
 	
 	// diffuse
-
-	dvec3 lightDir = glm::normalize(light.position - hitPoint);
-	double lambertian = max(glm::dot(normal, lightDir), 0.0);
+	dvec3 lightDir = glm::normalize(light.position - surface->hitPoint);
+	double lambertian = max(glm::dot(surface->normal, lightDir), 0.0);
 
 	// specular
 	double specular = 0;
 	if (lambertian > 0) {
 		dvec3 viewDir = glm::normalize(-ray.v);
-		dvec3 reflectDir = glm::reflect(-lightDir, normal);
+		dvec3 reflectDir = glm::reflect(-lightDir, surface->normal);
 		specular = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 	}
 

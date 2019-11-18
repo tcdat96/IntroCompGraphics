@@ -36,6 +36,11 @@ public:
 		return mMaterial.specular != dvec3(0);
 	}
 
+	dvec3 computeNormal(dvec3 point) {
+		dvec3 center = getXfm() * vec4(0, 0, 0, 1);
+		return glm::normalize(point - center);
+	}
+
 	double findIntersection(const Ray& ray) {
 		dvec3 u = mXfmInverse * dvec4(ray.u, 1.0);
 		dvec3 v = mXfmInverse * dvec4(ray.v, 0.0);

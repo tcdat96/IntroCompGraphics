@@ -1,4 +1,4 @@
-view 512 .5
+view 350 .5
 ambient .2 .2 .2
 background 0.0 0.0 1.0
 light 1.0 1.0 1.0  50.0 5.0 30.0
@@ -13,11 +13,11 @@ sphere
 move 0 -2.7 0
 scale 2 2 2
 material 0.3 0.3 0.3 0.0 1.0 0.0 20.0
-sphere
+#sphere
 move 0 -2 0
 scale 1.5 1.5 1.5
 material 0.3 0.3 0.3 0.0 0.0 1.0 50.0
-refraction 1 0 0 1.2
+refraction 1 1 1 1.2
 texture 1
 sphere
 groupend

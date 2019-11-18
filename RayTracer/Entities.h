@@ -21,8 +21,10 @@ struct Surface {
 	dvec3 normal;
 	Sphere* sphere = nullptr;
 	Surface(dvec3 hitPoint, dvec3 normal, Sphere* sphere) : hitPoint(hitPoint), normal(normal), sphere(sphere) {}
-	dvec3 adjustedHitPoint() {
-		return hitPoint + normal * 0.01;
+
+	const double DEFAULT_ADJUSTMENT = 0.01;
+	dvec3 adjustedHitPoint(bool outside = true) {
+		return hitPoint + normal * (outside ? DEFAULT_ADJUSTMENT : -DEFAULT_ADJUSTMENT);
 	}
 };
 

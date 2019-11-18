@@ -94,11 +94,11 @@ dvec3 shade(const Ray& ray, Surface* surface) {
 	}
 
 	// refraction
-	//auto refraction = surface->sphere->getRefraction();
-	//if (abs(refraction.eta - 1) > 0.00000001) {
-	//	Ray refract(surface->hitPoint - surface->normal * 0.1, glm::refract(ray.v, surface->normal, refraction.eta));
-	//	color += refraction.color * trace(refract);
-	//}
+	auto refraction = surface->sphere->getRefraction();
+	if (abs(refraction.eta - 1) > 0.00000001 && ray.depth < MAX_RAY_DEPTH) {
+		Ray refract(surface->adjustedHitPoint(false), glm::refract(ray.v, surface->normal, refraction.eta), ray.depth + 1);
+		color += refraction.color * trace(refract);
+	}
 
 	return color;
 }
@@ -266,6 +266,7 @@ void sphere() {
 void addTransformation(mat4 xfm) {
 	Group& group = gGroups.back();
 	group.xfm = group.xfm * xfm;
+	//group.xfm = xfm * group.xfm;
 }
 
 void scale(float sx, float sy, float sz) {

@@ -70,6 +70,11 @@ struct Group {
 	Group(const Group& group) : material(group.material), xfm(mat4(group.xfm)) {}
 };
 
+enum class AntiAlias {
+	NONE = 0,
+	SUPER_SAMPLING = 1
+};
+
 //const Material chrome = Material(vec3(0.25f), vec3(0.4f), vec3(0.774597f), 76.8f);
 //const Material gold = Material(vec3(0.24725f, 0.1995f, 0.0745f), vec3(0.75164f, 0.60648f, 0.22648f), vec3(0.628281f, 0.555802f, 0.366065f), 12.8f);
 //const Material copper = Material(vec3(0.19125f, 0.0735f, 0.0225f), vec3(0.7038f, 0.27048f, 0.0828f), vec3(0.256777f, 0.137622f, 0.086014f), 12.8f);

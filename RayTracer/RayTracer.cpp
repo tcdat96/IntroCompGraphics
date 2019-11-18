@@ -13,7 +13,8 @@ vector<Group> gGroups;
 vector<Sphere*> gSpheres;
 dvec3** gPixels = nullptr;
 
-
+AntiAlias gMode = AntiAlias::NONE;
+short gSubdivision = 2;
 
 int main() {
 	if (!readScene("SphereFlake1.scn")) {
@@ -21,28 +22,56 @@ int main() {
 		return 0;
 	}
 
+	castRays();
+
+	exportPpm(gPixels, n, n);
+
+	return 1;
+}
+
+void castRays() {
 	float pSize = 2 * d / n;
 	float halfSize = pSize / 2;
 	float iX = -d + halfSize;
 	float iY = d - halfSize;
-	float scale = glm::tan(glm::radians(60.0f));
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n; j++) {
-			Ray ray(gCamera);
-			float x = iX + j * pSize;
-			float y = iY - i * pSize;
-			ray.v = vec3(x * scale, y * scale, 0) - gCamera;
-			gPixels[i][j] = trace(ray);
+
+	Ray ray(gCamera);
+	switch (gMode)
+	{
+	case AntiAlias::SUPER_SAMPLING: {
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				float subSize = pSize / gSubdivision;
+				float iX = -d + pSize * j + subSize / 2;
+				float iY = d - pSize * i - subSize / 2;
+				gPixels[i][j] = dvec3(0);
+				for (int k = 0; k < gSubdivision; k++) {
+					for (int l = 0; l < gSubdivision; l++) {
+						float x = iX + l * subSize;
+						float y = iY - k * subSize;
+						ray.depth = 0;
+						ray.v = vec3(x, y, 0) - gCamera;
+						gPixels[i][j] += trace(ray);
+					}
+				}
+				gPixels[i][j] /= gSubdivision * gSubdivision;
+			}
 		}
+		break;
 	}
-
-	exportPpm(gPixels, n, n);
-
-	for (auto sphere : gSpheres) {
-		delete sphere;
+	case AntiAlias::NONE: default: {
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				float x = iX + j * pSize;
+				float y = iY - i * pSize;
+				ray.depth = 0;
+				ray.v = vec3(x, y, 0) - gCamera;
+				gPixels[i][j] = trace(ray);
+			}
+		}
+		break;
 	}
-
-	return 1;
+	}
 }
 
 dvec3 trace(const Ray& ray) {
@@ -94,11 +123,11 @@ dvec3 shade(const Ray& ray, Surface* surface) {
 	}
 
 	// refraction
-	auto refraction = surface->sphere->getRefraction();
-	if (abs(refraction.eta - 1) > 0.00000001 && ray.depth < MAX_RAY_DEPTH) {
-		Ray refract(surface->adjustedHitPoint(false), glm::refract(ray.v, surface->normal, refraction.eta), ray.depth + 1);
-		color += refraction.color * trace(refract);
-	}
+	//auto refraction = surface->sphere->getRefraction();
+	//if (abs(refraction.eta - 1) > 0.00000001 && ray.depth < MAX_RAY_DEPTH) {
+	//	Ray refract(surface->adjustedHitPoint(false), glm::refract(ray.v, surface->normal, refraction.eta), ray.depth + 1);
+	//	color += refraction.color * trace(refract);
+	//}
 
 	return color;
 }
@@ -131,6 +160,12 @@ dvec3 PhongIllumination(const Ray& ray, Surface* surface, const Light& light) {
 
 	dvec3 color = lambertian * material.getDiffuse(surface->hitPoint) + specular * material.specular;
 	return color * light.color;
+}
+
+void cleanUp() {
+	for (auto sphere : gSpheres) {
+		delete sphere;
+	}
 }
 
 // scene
@@ -204,6 +239,14 @@ bool readScene(string filename) {
 			iss >> mode;
 			texture(mode);
 		}
+		else if (startsWith(line, "antialias")) {
+			int mode;
+			iss >> mode;
+			gMode = (AntiAlias)mode;
+			if (gMode == AntiAlias::SUPER_SAMPLING) {
+				iss >> gSubdivision;
+			}
+		}
 	}
 
 	return gPixels != nullptr;
@@ -219,16 +262,13 @@ void exportPpm(dvec3** pixels, int xSize, int ySize) {
 
 	fprintf(ppm, "P6\n# %dx%d Raytracer output\n%d %d\n255\n",
 		xSize, ySize, xSize, ySize);
-	//for (int j = ySize - 1; j >= 0; j--) { // Y is flipped!
 	for (int i = 0; i < xSize; i++) {
 		for (int j = 0; j < ySize; j++) {
 			int r = int(min(pixels[i][j][0], 1.0) * 255);
 			int g = int(min(pixels[i][j][1], 1.0) * 255);
 			int b = int(min(pixels[i][j][2], 1.0) * 255);
-			//cout << (pixels[i][j][0] == 0.0 ? 1 : 0) << " ";
 			fprintf(ppm, "%c%c%c", r, g, b);
 		}
-		//cout << endl;
 	}
 
 	fclose(ppm);

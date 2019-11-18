@@ -13,8 +13,9 @@ struct Ray {
 	dvec3 v;
 	Sphere* sphere = nullptr;
 	double t = DBL_MAX;
+	short depth = 0;
 	Ray(dvec3 u) : u(u) {}
-	Ray(dvec3 u, dvec3 v) : u(u), v(v) {}
+	Ray(dvec3 u, dvec3 v, int depth = 0) : u(u), v(v), depth(depth) {}
 };
 
 struct Light {

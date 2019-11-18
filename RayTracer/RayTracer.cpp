@@ -25,7 +25,7 @@ int main() {
 	float halfSize = pSize / 2;
 	float iX = -d + halfSize;
 	float iY = d - halfSize;
-	float scale = glm::tan(glm::radians(60.0));
+	float scale = glm::tan(glm::radians(60.0f));
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
 			Ray ray(gCamera);
@@ -61,13 +61,24 @@ void findClosestIntersection(Ray& ray) {
 	}
 }
 
-dvec3 shade(const Ray& ray) {
+dvec3 shade(Ray& ray) {
 	dvec3 color = gAmbient;
+
 	dvec3 p = ray.u + ray.v * ray.t;
+	dvec3 center = ray.sphere->getXfm() * vec4(0, 0, 0, 1);
+	dvec3 normal = glm::normalize(p - center);
+
 	for (Light light : gLights) {
 		if (isShadow(p, ray, light)) continue;
-		color += PhongIllumination(p, ray, light);
+		color += PhongIllumination(p, normal, ray, light);
 	}
+
+	// reflection
+	if (ray.sphere->isReflected() && ray.depth < MAX_RAY_DEPTH) {
+		Ray reflect(p + normal * 0.1, glm::reflect(ray.v, normal), ray.depth + 1);
+		color += 0.2 * trace(reflect);
+	}
+
 	return color;
 }
 
@@ -83,12 +94,11 @@ bool isShadow(dvec3 hitPoint, const Ray& ray, Light light) {
 	return false;
 }
 
-dvec3 PhongIllumination(dvec3 hitPoint, const Ray& ray, Light light) {
+dvec3 PhongIllumination(dvec3 hitPoint, dvec3 normal, const Ray& ray, Light light) {
 	Material material = ray.sphere->getMaterial();
 	
 	// diffuse
-	dvec3 center = ray.sphere->getXfm() * vec4(0, 0, 0, 1);
-	dvec3 normal = glm::normalize(hitPoint - center);
+
 	dvec3 lightDir = glm::normalize(light.position - hitPoint);
 	double lambertian = max(glm::dot(normal, lightDir), 0.0);
 

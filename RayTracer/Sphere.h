@@ -32,6 +32,10 @@ public:
 		return mMaterial;
 	}
 
+	bool isReflected() {
+		return mMaterial.specular != dvec3(0);
+	}
+
 	double findIntersection(const Ray& ray) {
 		dvec3 u = mXfmInverse * dvec4(ray.u, 1.0);
 		dvec3 v = mXfmInverse * dvec4(ray.v, 0.0);

@@ -26,13 +26,23 @@ int main() {
 	Refraction* scene = new Refraction(vec3(0), AIR_COEFFICENT);
 	gRefracted.push_back(scene);
 
-	castRays();
+	// casting primary rays
+	switch (gMode)
+	{
+	case AntiAlias::SUPER_SAMPLING: {
+		castRaysSuperSampling();
+		break;
+	}
+	case AntiAlias::NONE: 
+	default: {
+		castRays();
+		break;
+	}
+	}
 
 	exportPpm(gPixels, n, n);
 
-	delete scene;
 	cleanUp();
-
 	return 1;
 }
 
@@ -43,41 +53,38 @@ void castRays() {
 	float iY = d - halfSize;
 
 	Ray ray(gCamera);
-	switch (gMode)
-	{
-	case AntiAlias::SUPER_SAMPLING: {
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; j++) {
-				float subSize = pSize / gSubdivision;
-				float iX = -d + pSize * j + subSize / 2;
-				float iY = d - pSize * i - subSize / 2;
-				gPixels[i][j] = dvec3(0);
-				for (int k = 0; k < gSubdivision; k++) {
-					for (int l = 0; l < gSubdivision; l++) {
-						float x = iX + l * subSize;
-						float y = iY - k * subSize;
-						ray.depth = 0;
-						ray.v = vec3(x, y, 0) - gCamera;
-						gPixels[i][j] += trace(ray);
-					}
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			float x = iX + j * pSize;
+			float y = iY - i * pSize;
+			ray.depth = 0;
+			ray.v = vec3(x, y, 0) - gCamera;
+			gPixels[i][j] = trace(ray);
+		}
+	}
+}
+
+void castRaysSuperSampling() {
+	float pSize = 2 * d / n;
+
+	Ray ray(gCamera);
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			float subSize = pSize / gSubdivision;
+			float iX = -d + pSize * j + subSize / 2;
+			float iY = d - pSize * i - subSize / 2;
+			gPixels[i][j] = dvec3(0);
+			for (int k = 0; k < gSubdivision; k++) {
+				for (int l = 0; l < gSubdivision; l++) {
+					float x = iX + l * subSize;
+					float y = iY - k * subSize;
+					ray.depth = 0;
+					ray.v = vec3(x, y, 0) - gCamera;
+					gPixels[i][j] += trace(ray);
 				}
-				gPixels[i][j] /= gSubdivision * gSubdivision;
 			}
+			gPixels[i][j] /= gSubdivision * gSubdivision;
 		}
-		break;
-	}
-	case AntiAlias::NONE: default: {
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; j++) {
-				float x = iX + j * pSize;
-				float y = iY - i * pSize;
-				ray.depth = 0;
-				ray.v = vec3(x, y, 0) - gCamera;
-				gPixels[i][j] = trace(ray);
-			}
-		}
-		break;
-	}
 	}
 }
 
@@ -193,6 +200,7 @@ dvec3 calcRefraction(const Ray& ray, Surface* surface, Refraction* curRef) {
 }
 
 void cleanUp() {
+	delete gRefracted[0];
 	for (auto sphere : gSpheres) {
 		delete sphere;
 	}

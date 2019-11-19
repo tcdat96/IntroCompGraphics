@@ -20,6 +20,7 @@
 using namespace std;
 
 void castRays();
+void castRaysSuperSampling();
 dvec3 trace(const Ray& ray);
 Surface* findClosestIntersection(const Ray& ray);
 dvec3 shade(const Ray& ray, Surface* surface);

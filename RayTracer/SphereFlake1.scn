@@ -1,6 +1,6 @@
 view 256 .5
 ambient .2 .2 .2
-antialias 0
+antialias 1
 background 0.0 0.0 1.0
 light 1.0 1.0 1.0  50.0 5.0 30.0
 light 1.0 1.0 1.0 -50.0 5.0 30.0

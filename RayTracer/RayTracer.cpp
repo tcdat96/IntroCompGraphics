@@ -15,7 +15,7 @@ vector<Sphere*> gSpheres;
 dvec3** gPixels = nullptr;
 
 AntiAlias gMode = AntiAlias::NONE;
-short gSubdivision = 2;
+int gSubdivision = 2;
 
 int main() {
 	if (!readScene("SphereFlake1.scn")) {
@@ -278,6 +278,7 @@ bool readScene(string filename) {
 			gMode = (AntiAlias)mode;
 			if (gMode == AntiAlias::SUPER_SAMPLING) {
 				iss >> gSubdivision;
+				gSubdivision = std::min(std::max(gSubdivision, 0), MAX_SUPER_SAMPLING_SUBDIVISION);
 			}
 		}
 	}

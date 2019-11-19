@@ -14,7 +14,8 @@
 
 //#define DEBUG
 
-const short MAX_RAY_DEPTH = 2;
+#define MAX_RAY_DEPTH 2
+#define MAX_SUPER_SAMPLING_SUBDIVISION 3
 
 using namespace std;
 

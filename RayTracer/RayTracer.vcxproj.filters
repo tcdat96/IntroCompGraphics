@@ -37,10 +37,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="SphereFlake.scn">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="out.ppm">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="SphereFlake.scn">
+    <None Include="SphereFlake1.scn">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

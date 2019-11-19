@@ -18,6 +18,14 @@ struct Ray {
 	Ray(dvec3 u, dvec3 v, int depth = 0) : u(u), v(v), depth(depth) {}
 };
 
+struct Intersection {
+	double t = DBL_MAX;
+	Sphere* sphere;
+	dvec3 uObj, vObj;
+	Intersection(double t, dvec3 u, dvec3 v, Sphere* sphere) :
+		t(t), uObj(u), vObj(v), sphere(sphere) {}
+};
+
 struct Surface {
 	dvec3 hitPoint;
 	dvec3 normal;

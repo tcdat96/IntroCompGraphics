@@ -92,21 +92,24 @@ dvec3 trace(const Ray& ray) {
 }
 
 Surface* findClosestIntersection(const Ray& ray) {
-	double tNear = DBL_MAX;
-	Sphere* sphereNear = nullptr;
+	Intersection* nearest = nullptr;
 	for (auto sphere : gSpheres) {
-		double t = sphere->findIntersection(ray);
-		if (t < 0) continue;
-		if (t < tNear) {
-			tNear = t;
-			sphereNear = sphere;
+		Intersection* curInt = sphere->findIntersection(ray);
+		if (curInt != nullptr) {
+			if (nearest == nullptr || curInt->t < nearest->t) {
+				nearest = curInt;
+			}
+			else {
+				delete curInt;
+			}
 		}
 	}
 
-	if (sphereNear != nullptr) {
-		dvec3 p = ray.u + ray.v * tNear;
-		dvec3 normal = sphereNear->computeNormal(p);
-		return new Surface(p, normal, sphereNear);
+	if (nearest != nullptr) {
+		dvec3 p = ray.u + ray.v * nearest->t;
+		auto sphere = nearest->sphere;
+		dvec3 normal = sphere->computeNormal(nearest);
+		return new Surface(p, normal, sphere);
 	}
 	return nullptr;
 }
@@ -138,8 +141,8 @@ dvec3 shade(const Ray& ray, Surface* surface) {
 bool isShadow(dvec3 hitPoint, const Light& light) {
 	Ray shadowRay(hitPoint, light.position - hitPoint);
 	for (auto sphere : gSpheres) {
-		double t = sphere->findIntersection(shadowRay);
-		if (t >= 0) {
+		auto curInt = sphere->findIntersection(shadowRay);
+		if (curInt != nullptr) {
 			return true;
 		}
 	}
@@ -350,8 +353,8 @@ void move(float x, float y, float z) {
 }
 
 void rotate(float angle, float x, float y, float z) {
-	//mat4 xfm = glm::rotate(mat4(1), angle, vec3(x, y, z));
-	//addTransformation(xfm);
+	mat4 xfm = glm::rotate(mat4(1), radians(angle), vec3(x, y, z));
+	addTransformation(xfm);
 }
 
 void light(float r, float g, float b, float x, float y, float z) {

@@ -47,12 +47,13 @@ public:
 		return mMaterial.specular != dvec3(0);
 	}
 
-	dvec3 computeNormal(dvec3 point) {
-		dvec3 center = getXfm() * vec4(0, 0, 0, 1);
-		return glm::normalize(point - center);
+	dvec3 computeNormal(Intersection* ints) {
+		dvec3 p = ints->uObj + ints->vObj * ints->t;
+		dvec3 normal = transpose(mXfmInverse) * dvec4(p, 0);
+		return normalize(normal);
 	}
 
-	double findIntersection(const Ray& ray) {
+	Intersection* findIntersection(const Ray& ray) {
 		dvec3 u = mXfmInverse * dvec4(ray.u, 1.0);
 		dvec3 v = mXfmInverse * dvec4(ray.v, 0.0);
 
@@ -61,12 +62,13 @@ public:
 		double c = glm::dot(u, u) - 1;
 		double delta = b * b - 4 * a * c;
 
-		if (delta < 0) return -1;
+		if (delta < 0) return nullptr;
 		double root = sqrt(delta);
-		double t0 = 0.5 * (-b - root) / a;
-		if (t0 >= 0) return t0;
-		double t1 = 0.5 * (-b + root) / a;
-		return t1 >= 0 ? t1 : -1;
+		double t = 0.5 * (-b - root) / a;
+		if (t < 0) {
+			t = 0.5 * (-b + root) / a;
+		}
+		return t < 0 ? nullptr : new Intersection(t, u, v, this);
 	}
 };
 

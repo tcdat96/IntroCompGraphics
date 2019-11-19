@@ -138,6 +138,7 @@
   <ItemGroup>
     <None Include="out.ppm" />
     <None Include="SphereFlake.scn" />
+    <None Include="SphereFlake1.scn" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

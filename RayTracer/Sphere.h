@@ -19,11 +19,16 @@ private:
 	mat4 mXfmInverse;
 
 	Material mMaterial;
-	Refraction mRefraction;
+	Refraction* mRefraction;
 public:
-	Sphere(mat4 xfm, Material material, Refraction refraction): mMaterial(material), mRefraction(refraction) {
+	Sphere(mat4 xfm, Material material, Refraction refraction): mMaterial(material) {
 		mXfm = xfm;
 		mXfmInverse = glm::inverse(xfm);
+		mRefraction = new Refraction(refraction);
+	}
+
+	~Sphere() {
+		delete mRefraction;
 	}
 
 	mat4 getXfm() {
@@ -34,7 +39,7 @@ public:
 		return mMaterial;
 	}
 
-	Refraction getRefraction() {
+	Refraction* getRefraction() {
 		return mRefraction;
 	}
 

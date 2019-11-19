@@ -19,7 +19,6 @@ move 0 -2 0
 scale 1.5 1.5 1.5
 material 0.3 0.3 0.3 0.0 0.0 1.0 50.0
 refraction 1 1 1 1.2
-texture 1
 sphere
 groupend
 group
@@ -31,6 +30,7 @@ groupend
 group
 move -3 0 -8
 material .3 1.0 0.3 .8 .1 .1 100.0
+texture 1
 sphere
 move 0 -1004 0
 material .3 1.0 0.3 .8 .1 .1 100.0 0.1

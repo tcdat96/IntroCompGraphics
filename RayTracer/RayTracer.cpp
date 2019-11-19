@@ -8,6 +8,7 @@ vec3 gCamera(0, 0, 1);
 dvec3 gBackground = vec3(0, 0, 0);
 vector<Light> gLights;
 dvec3 gAmbient;
+vector<Refraction*> gRefracted;
 
 vector<Group> gGroups;
 vector<Sphere*> gSpheres;
@@ -22,9 +23,15 @@ int main() {
 		return 0;
 	}
 
+	Refraction* scene = new Refraction(vec3(0), AIR_COEFFICENT);
+	gRefracted.push_back(scene);
+
 	castRays();
 
 	exportPpm(gPixels, n, n);
+
+	delete scene;
+	cleanUp();
 
 	return 1;
 }
@@ -123,11 +130,7 @@ dvec3 shade(const Ray& ray, Surface* surface) {
 	}
 
 	// refraction
-	//auto refraction = surface->sphere->getRefraction();
-	//if (abs(refraction.eta - 1) > 0.00000001 && ray.depth < MAX_RAY_DEPTH) {
-	//	Ray refract(surface->adjustedHitPoint(false), glm::refract(ray.v, surface->normal, refraction.eta), ray.depth + 1);
-	//	color += refraction.color * trace(refract);
-	//}
+	//color += calcRefraction(ray, surface, sphere->getRefraction());
 
 	return color;
 }
@@ -148,18 +151,45 @@ dvec3 PhongIllumination(const Ray& ray, Surface* surface, const Light& light) {
 	
 	// diffuse
 	dvec3 lightDir = glm::normalize(light.position - surface->hitPoint);
-	double lambertian = max(glm::dot(surface->normal, lightDir), 0.0);
+	double lambertian = glm::max(glm::dot(surface->normal, lightDir), 0.0);
 
 	// specular
 	double specular = 0;
 	if (lambertian > 0) {
 		dvec3 viewDir = glm::normalize(-ray.v);
 		dvec3 reflectDir = glm::reflect(-lightDir, surface->normal);
-		specular = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+		specular = pow(glm::max(dot(viewDir, reflectDir), 0.0), material.shininess);
 	}
 
 	dvec3 color = lambertian * material.getDiffuse(surface->hitPoint) + specular * material.specular;
 	return color * light.color;
+}
+
+dvec3 calcRefraction(const Ray& ray, Surface* surface, Refraction* curRef) {
+	dvec3 color = dvec3(0);
+	bool existed = find(gRefracted.begin(), gRefracted.end(), curRef) != gRefracted.end();
+	if ((existed || !equals(curRef->eta, gRefracted.back()->eta)) && ray.depth < MAX_RAY_DEPTH) {
+		double eta = 0;
+		if (existed) {
+			double prevEta = curRef->eta;
+			gRefracted.erase(std::remove(gRefracted.begin(), gRefracted.end(), curRef), gRefracted.end());
+			eta = gRefracted.back()->eta / prevEta;
+		}
+		else {
+			eta = curRef->eta / gRefracted.back()->eta;
+		}
+
+		dvec3 refractRay = glm::refract(ray.v, surface->normal, eta);
+		if (refractRay != dvec3(0)) {
+			if (existed) {
+				gRefracted.push_back(curRef);
+			}
+			dvec3 u = surface->adjustedHitPoint(!existed);
+			Ray refract(u, refractRay, ray.depth + 1);
+			color += 0.2 * trace(refract);
+		}
+	}
+	return color;
 }
 
 void cleanUp() {
@@ -264,9 +294,9 @@ void exportPpm(dvec3** pixels, int xSize, int ySize) {
 		xSize, ySize, xSize, ySize);
 	for (int i = 0; i < xSize; i++) {
 		for (int j = 0; j < ySize; j++) {
-			int r = int(min(pixels[i][j][0], 1.0) * 255);
-			int g = int(min(pixels[i][j][1], 1.0) * 255);
-			int b = int(min(pixels[i][j][2], 1.0) * 255);
+			int r = int(std::min(pixels[i][j][0], 1.0) * 255);
+			int g = int(std::min(pixels[i][j][1], 1.0) * 255);
+			int b = int(std::min(pixels[i][j][2], 1.0) * 255);
 			fprintf(ppm, "%c%c%c", r, g, b);
 		}
 	}

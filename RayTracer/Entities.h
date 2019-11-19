@@ -4,6 +4,8 @@
 
 class Sphere;
 
+const double AIR_COEFFICENT = 1.0002926;
+
 struct Pixel {
 	int r, g, b;
 };
@@ -22,7 +24,7 @@ struct Surface {
 	Sphere* sphere = nullptr;
 	Surface(dvec3 hitPoint, dvec3 normal, Sphere* sphere) : hitPoint(hitPoint), normal(normal), sphere(sphere) {}
 
-	const double DEFAULT_ADJUSTMENT = 0.01;
+	const double DEFAULT_ADJUSTMENT = 0.0001;
 	dvec3 adjustedHitPoint(bool outside = true) {
 		return hitPoint + normal * (outside ? DEFAULT_ADJUSTMENT : -DEFAULT_ADJUSTMENT);
 	}
@@ -36,7 +38,7 @@ struct Light {
 
 struct Refraction {
 	dvec3 color;
-	double eta = 1;
+	double eta = AIR_COEFFICENT;
 	Refraction() {}
 	Refraction(dvec3 color, double eta) : color(color), eta(eta) {}
 };

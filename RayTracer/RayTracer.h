@@ -25,6 +25,7 @@ Surface* findClosestIntersection(const Ray& ray);
 dvec3 shade(const Ray& ray, Surface* surface);
 bool isShadow(dvec3 hitPoint, const Light& light);
 dvec3 PhongIllumination(const Ray& ray, Surface* surface, const Light& light);
+dvec3 calcRefraction(const Ray& ray, Surface* surface, Refraction* curRef);
 
 void cleanUp();
 bool readScene(string filename);

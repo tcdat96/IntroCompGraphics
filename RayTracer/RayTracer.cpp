@@ -174,20 +174,17 @@ dvec3 calcRefraction(const Ray& ray, Surface* surface, Refraction* curRef) {
 	if ((existed || !equals(curRef->eta, gRefracted.back()->eta)) && ray.depth < MAX_RAY_DEPTH) {
 		double eta = 0;
 		if (existed) {
-			double prevEta = curRef->eta;
 			gRefracted.erase(std::remove(gRefracted.begin(), gRefracted.end(), curRef), gRefracted.end());
-			eta = gRefracted.back()->eta / prevEta;
+			eta = gRefracted.back()->eta / curRef->eta;
 		}
 		else {
 			eta = curRef->eta / gRefracted.back()->eta;
+			gRefracted.push_back(curRef);
 		}
 
 		dvec3 refractRay = glm::refract(ray.v, surface->normal, eta);
 		if (refractRay != dvec3(0)) {
-			if (existed) {
-				gRefracted.push_back(curRef);
-			}
-			dvec3 u = surface->adjustedHitPoint(!existed);
+			dvec3 u = surface->adjustedHitPoint(existed);
 			Ray refract(u, refractRay, ray.depth + 1);
 			color += 0.2 * trace(refract);
 		}

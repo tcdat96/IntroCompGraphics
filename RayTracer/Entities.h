@@ -33,8 +33,8 @@ struct Surface {
 	Surface(dvec3 hitPoint, dvec3 normal, Sphere* sphere) : hitPoint(hitPoint), normal(normal), sphere(sphere) {}
 
 	const double DEFAULT_ADJUSTMENT = 0.0001;
-	dvec3 adjustedHitPoint(bool outside = true) {
-		return hitPoint + normal * (outside ? DEFAULT_ADJUSTMENT : -DEFAULT_ADJUSTMENT);
+	dvec3 adjustedHitPoint(bool outward = true) {
+		return hitPoint + normal * (outward ? DEFAULT_ADJUSTMENT : -DEFAULT_ADJUSTMENT);
 	}
 };
 

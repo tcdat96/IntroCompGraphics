@@ -15,7 +15,8 @@ vector<Sphere*> gSpheres;
 dvec3** gPixels = nullptr;
 
 AntiAlias gMode = AntiAlias::NONE;
-int gSubdivision = 2;
+int gSubdivision = DEFAULT_SAMPLING_SUBDIVISION;
+int gProgress = 0;
 
 int main() {
 	if (!readScene("SphereFlake1.scn")) {
@@ -26,6 +27,7 @@ int main() {
 	Refraction* scene = new Refraction(vec3(0), AIR_COEFFICENT);
 	gRefracted.push_back(scene);
 
+	auto start = chrono::high_resolution_clock::now();
 	// casting primary rays
 	switch (gMode)
 	{
@@ -33,12 +35,18 @@ int main() {
 		castRaysSuperSampling();
 		break;
 	}
+	case AntiAlias::ADAPTIVE_SAMPLING:
+		castRaysAdaptiveSuperSampling();
+		break;
 	case AntiAlias::NONE: 
 	default: {
 		castRays();
 		break;
 	}
 	}
+	auto end = chrono::high_resolution_clock::now();
+	auto duration = chrono::duration_cast<std::chrono::seconds>(end - start).count();
+	cout << "\rTime spent: " << duration << "s";
 
 	exportPpm(gPixels, n, n);
 
@@ -60,6 +68,8 @@ void castRays() {
 			ray.depth = 0;
 			ray.v = vec3(x, y, 0) - gCamera;
 			gPixels[i][j] = trace(ray);
+
+			printProgress(i, j);
 		}
 	}
 }
@@ -84,8 +94,75 @@ void castRaysSuperSampling() {
 				}
 			}
 			gPixels[i][j] /= gSubdivision * gSubdivision;
+			printProgress(i, j);
 		}
 	}
+}
+
+void castRaysAdaptiveSuperSampling() {
+	float pSize = 2 * d / n;
+
+	int percentage = 0;
+	int pixels = n * n;
+
+	Ray ray(gCamera);
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			float x = -d + j * pSize;
+			float y = d - i * pSize;
+			gPixels[i][j] = castRayAdaptive(x, y, pSize);
+			printProgress(i, j);
+		}
+	}
+}
+
+dvec3 castRayAdaptive(float left, float top, float size, int depth) {
+	Ray ray(gCamera);
+	float bottom = top + size;
+	float right = left + size;
+
+	dvec3 tl = traceAdaptive(ray, left, top);
+	dvec3 tr = traceAdaptive(ray, right, top);
+	dvec3 bl = traceAdaptive(ray, left, bottom);
+	dvec3 br = traceAdaptive(ray, right, bottom);
+
+	if (!similar(tl, tr, bl, br) && depth < gSubdivision) {
+		float midV = top + size / 2;
+		float midH = left + size / 2;
+		float halfSize = size / 2;
+		tl = castRayAdaptive(left, top, halfSize, depth + 1);
+		tr = castRayAdaptive(midH, top, halfSize, depth + 1);
+		bl = castRayAdaptive(left, midV, halfSize, depth + 1);
+		br = castRayAdaptive(midH, midV, halfSize, depth + 1);
+	}
+
+	return (tl + tr + bl + br) / 4.0;
+}
+
+dvec3 traceAdaptive(Ray& ray, float x, float y) {
+	static std::unordered_map<string, dvec3> colorMap;
+
+	// little hack to obtain the key
+	int factor = 10000000;
+	auto key = to_string(int(x * factor)) + to_string(int(y * factor));
+	auto value = colorMap.find(key);
+	if (value != colorMap.end()) {
+		return value->second;
+	} 
+
+	// limit memory
+	if (colorMap.size() > (1 << 12)) {
+		colorMap.clear();
+	}
+	dvec3 color = trace(ray, x, y);
+	colorMap.insert(make_pair(key, color));
+	return color;
+}
+
+dvec3 trace(Ray& ray, float x, float y) {
+	ray.depth = 0;
+	ray.v = vec3(x, y, 0) - gCamera;
+	return trace(ray);
 }
 
 dvec3 trace(const Ray& ray) {
@@ -199,6 +276,15 @@ dvec3 calcRefraction(const Ray& ray, Surface* surface, Refraction* curRef) {
 	return color;
 }
 
+void printProgress(int i, int j) {
+	static int nPixels = n * n;
+	int progress = (i * n + j) * 100 / nPixels;
+	if (progress > gProgress) {
+		cout << "\r" << progress << "%";
+		gProgress = progress;
+	}
+}
+
 void cleanUp() {
 	delete gRefracted[0];
 	for (auto sphere : gSpheres) {
@@ -263,7 +349,8 @@ bool readScene(string filename) {
 			ambient(r, g, b);
 		}
 		else if (startsWith(line, "material")) {
-			float dr, dg, db, sr, sg, sb, p, kr = 0;
+			float dr, dg, db, sr, sg, sb, p;
+			float kr = DEFAULT_REFLECTION_COEFFICENT;
 			iss >> dr >> dg >> db >> sr >> sg >> sb >> p >> kr;
 			material(dr, dg, db, sr, sg, sb, p, kr);
 		}
@@ -278,13 +365,9 @@ bool readScene(string filename) {
 			texture(mode);
 		}
 		else if (startsWith(line, "antialias")) {
-			int mode;
-			iss >> mode;
-			gMode = (AntiAlias)mode;
-			if (gMode == AntiAlias::SUPER_SAMPLING) {
-				iss >> gSubdivision;
-				gSubdivision = std::min(std::max(gSubdivision, 0), MAX_SUPER_SAMPLING_SUBDIVISION);
-			}
+			int mode, subdivision = DEFAULT_SAMPLING_SUBDIVISION;
+			iss >> mode >> subdivision;
+			antiAlias(mode, subdivision);
 		}
 	}
 
@@ -397,4 +480,9 @@ void texture(int mode) {
 		gGroups.back().material.procTexture = true;
 		break;
 	}
+}
+
+void antiAlias(int mode, int subdivision) {
+	gMode = (AntiAlias)mode;
+	gSubdivision = std::min(std::max(subdivision, 0), MAX_SAMPLING_SUBDIVISION);
 }

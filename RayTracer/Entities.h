@@ -82,7 +82,8 @@ struct Group {
 
 enum class AntiAlias {
 	NONE = 0,
-	SUPER_SAMPLING = 1
+	SUPER_SAMPLING = 1,
+	ADAPTIVE_SAMPLING = 2
 };
 
 //const Material chrome = Material(vec3(0.25f), vec3(0.4f), vec3(0.774597f), 76.8f);

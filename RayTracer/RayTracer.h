@@ -15,6 +15,10 @@
 
 //#define DEBUG
 
+#ifdef __unix
+#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL
+#endif
+
 #define DEFAULT_REFLECTION_COEFFICENT 0.1f
 #define MAX_RAY_DEPTH 2
 #define DEFAULT_SAMPLING_SUBDIVISION 2

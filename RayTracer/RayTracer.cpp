@@ -20,9 +20,13 @@ int gProgress = 0;
 
 bool gHasMotion = false;
 
-int main() {
-	if (!readScene("SphereFlake1.scn")) {
-		cout << "There was a problem reading scene file.";
+int main(int argc, char** argv) {
+	if (argc == 1) {
+		cout << "Missing scene file.\n";
+		return 0;
+	}
+	if (!readScene(argv[1])) {
+		cout << "There was a problem reading " << argv[1] << ".\n";
 		return 0;
 	}
 

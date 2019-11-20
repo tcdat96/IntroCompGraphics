@@ -73,6 +73,10 @@
     <IncludePath>E:\study\postgrad\OpenGL\include;$(IncludePath)</IncludePath>
     <LibraryPath>E:\study\postgrad\OpenGL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>E:\study\postgrad\OpenGL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\study\postgrad\OpenGL\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -137,7 +141,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="out.ppm" />
-    <None Include="SphereFlake.scn" />
+    <None Include="SphereFlake2.scn" />
+    <None Include="test.scn" />
     <None Include="SphereFlake1.scn" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

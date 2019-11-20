@@ -20,8 +20,11 @@ private:
 
 	Material mMaterial;
 	Refraction* mRefraction;
+
+	bool mHasMotion;
 public:
-	Sphere(mat4 xfm, Material material, Refraction refraction): mMaterial(material) {
+	Sphere(mat4 xfm, Material material, Refraction refraction, bool hasMotion = false) :
+		mMaterial(material), mHasMotion(hasMotion) {
 		mXfm = xfm;
 		mXfmInverse = glm::inverse(xfm);
 		mRefraction = new Refraction(refraction);
@@ -41,6 +44,13 @@ public:
 
 	Refraction* getRefraction() {
 		return mRefraction;
+	}
+
+	void updateMotion() {
+		if (mHasMotion) {
+			mXfm = translate(mat4(1), vec3(0, 0.1, 0)) * mXfm;
+			mXfmInverse = inverse(mXfm);
+		}
 	}
 
 	bool isReflected() {

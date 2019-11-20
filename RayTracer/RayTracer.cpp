@@ -18,6 +18,8 @@ AntiAlias gMode = AntiAlias::NONE;
 int gSubdivision = DEFAULT_SAMPLING_SUBDIVISION;
 int gProgress = 0;
 
+bool gHasMotion = false;
+
 int main() {
 	if (!readScene("SphereFlake1.scn")) {
 		cout << "There was a problem reading scene file.";
@@ -26,6 +28,32 @@ int main() {
 
 	Refraction* scene = new Refraction(vec3(0), AIR_COEFFICENT);
 	gRefracted.push_back(scene);
+
+	if (!gHasMotion) {
+		castRays();
+	} 
+	else {
+		for (int i = 0; i < MOTION_BLUR_ITERATION; i++) {
+			castRays();
+			for (auto sphere : gSpheres) {
+				sphere->updateMotion();
+			}
+		}
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				gPixels[i][j] /= MOTION_BLUR_ITERATION;
+			}
+		}
+	}
+
+	exportPpm(gPixels, n, n);
+
+	cleanUp();
+	return 1;
+}
+
+void castRays() {
+	gProgress = 0;
 
 	auto start = chrono::high_resolution_clock::now();
 	// casting primary rays
@@ -38,23 +66,18 @@ int main() {
 	case AntiAlias::ADAPTIVE_SAMPLING:
 		castRaysAdaptiveSuperSampling();
 		break;
-	case AntiAlias::NONE: 
+	case AntiAlias::NONE:
 	default: {
-		castRays();
+		castRaysDefault();
 		break;
 	}
 	}
 	auto end = chrono::high_resolution_clock::now();
 	auto duration = chrono::duration_cast<std::chrono::seconds>(end - start).count();
-	cout << "\rTime spent: " << duration << "s";
-
-	exportPpm(gPixels, n, n);
-
-	cleanUp();
-	return 1;
+	cout << "\rTime spent: " << duration << "s" << endl;
 }
 
-void castRays() {
+void castRaysDefault() {
 	float pSize = 2 * d / n;
 	float halfSize = pSize / 2;
 	float iX = -d + halfSize;
@@ -67,7 +90,7 @@ void castRays() {
 			float y = iY - i * pSize;
 			ray.depth = 0;
 			ray.v = vec3(x, y, 0) - gCamera;
-			gPixels[i][j] = trace(ray);
+			gPixels[i][j] += trace(ray);
 
 			printProgress(i, j);
 		}
@@ -83,17 +106,18 @@ void castRaysSuperSampling() {
 			float subSize = pSize / gSubdivision;
 			float iX = -d + pSize * j + subSize / 2;
 			float iY = d - pSize * i - subSize / 2;
-			gPixels[i][j] = dvec3(0);
+			auto color = dvec3(0);
 			for (int k = 0; k < gSubdivision; k++) {
 				for (int l = 0; l < gSubdivision; l++) {
 					float x = iX + l * subSize;
 					float y = iY - k * subSize;
 					ray.depth = 0;
 					ray.v = vec3(x, y, 0) - gCamera;
-					gPixels[i][j] += trace(ray);
+					color += trace(ray);
 				}
 			}
-			gPixels[i][j] /= gSubdivision * gSubdivision;
+			color /= gSubdivision * gSubdivision;
+			gPixels[i][j] += color;
 			printProgress(i, j);
 		}
 	}
@@ -110,7 +134,7 @@ void castRaysAdaptiveSuperSampling() {
 		for (int j = 0; j < n; j++) {
 			float x = -d + j * pSize;
 			float y = d - i * pSize;
-			gPixels[i][j] = castRayAdaptive(x, y, pSize);
+			gPixels[i][j] += castRayAdaptive(x, y, pSize);
 			printProgress(i, j);
 		}
 	}
@@ -369,6 +393,12 @@ bool readScene(string filename) {
 			iss >> mode >> subdivision;
 			antiAlias(mode, subdivision);
 		}
+		else if (startsWith(line, "motionBlur")) {
+			bool enabled = true;
+			iss >> enabled;
+			gGroups.back().motionBlur = enabled;
+			if (enabled) gHasMotion = true;
+		}
 	}
 
 	return gPixels != nullptr;
@@ -416,12 +446,15 @@ void setView(int nPixel, float distance) {
 	gPixels = new dvec3 * [n];
 	for (int i = 0; i < n; i++) {
 		gPixels[i] = new dvec3[n];
+		for (int j = 0; j < n; j++) {
+			gPixels[i][j] = dvec3(0);
+		}
 	}
 }
 
 void sphere() {
 	Group& group = gGroups.back();
-	Sphere* sphere = new Sphere(group.xfm, group.material, group.refraction);
+	Sphere* sphere = new Sphere(group.xfm, group.material, group.refraction, group.motionBlur);
 	gSpheres.push_back(sphere);
 }
 

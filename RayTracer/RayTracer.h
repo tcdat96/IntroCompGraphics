@@ -19,14 +19,17 @@
 #define MAX_RAY_DEPTH 2
 #define DEFAULT_SAMPLING_SUBDIVISION 2
 #define MAX_SAMPLING_SUBDIVISION 3
+#define MOTION_BLUR_ITERATION 10
 
 using namespace std;
 
 void castRays();
+void castRaysDefault();
 void castRaysSuperSampling();
 void castRaysAdaptiveSuperSampling();
 dvec3 castRayAdaptive(float left, float top, float size, int depth = 0);
 dvec3 traceAdaptive(Ray& ray, float x, float y);
+
 dvec3 trace(Ray& ray, float x, float y);
 dvec3 trace(const Ray& ray);
 Surface* findClosestIntersection(const Ray& ray);

@@ -76,6 +76,7 @@ struct Group {
 	Material material;
 	Refraction refraction;
 	mat4 xfm = mat4(1);
+	bool motionBlur = false;
 	Group() {}
 	Group(const Group& group) : material(group.material), xfm(mat4(group.xfm)) {}
 };

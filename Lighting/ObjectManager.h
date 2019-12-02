@@ -4,7 +4,6 @@
 #include <set>
 
 #include "utils.h"
-#include "MyHouse.h"
 #include "Sphere.h"
 
 constexpr float TRANSLATE_DELTA = 6;

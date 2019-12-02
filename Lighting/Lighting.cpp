@@ -129,15 +129,7 @@ void setUpLight() {
 
 void setUpShaders() {
 	// vertex shader
-	if (gUseCookLightModel) {
-		gVertexProgram = initShaders(SHADER_VERTEX_COOK_TORRANCE, SHADER_FRAG_COOK_TORRANCE);
-	}
-	else if (gUseGouraudShading) {
-		gVertexProgram = initShaders(SHADER_VERTEX_GOURAUD, SHADER_FRAG_GOURAUD);;
-	}
-	else {
-		gVertexProgram = initShaders(SHADER_VERTEX_PHONG, SHADER_FRAG_PHONG);
-	}
+	gVertexProgram = initShaders(SHADER_VERTEX, SHADER_FRAG);
 	glUseProgram(gVertexProgram);
 
 	// position attribute

@@ -29,13 +29,8 @@ GLFWwindow* window;
 constexpr auto SCREEN_WIDTH = 1024;
 constexpr auto SCREEN_HEIGHT = 768;
 
-constexpr const char* SHADER_VERTEX_PHONG = "PhongVertex.glsl";
-constexpr const char* SHADER_FRAG_PHONG = "PhongFrag.glsl";
-constexpr const char* SHADER_VERTEX_GOURAUD = "GouraudVertex.glsl";
-constexpr const char* SHADER_FRAG_GOURAUD = "GouraudFrag.glsl";
-
-constexpr const char* SHADER_VERTEX_COOK_TORRANCE = "PhongVertex.glsl";
-constexpr const char* SHADER_FRAG_COOK_TORRANCE = "CookTorranceFrag.glsl";
+constexpr const char* SHADER_VERTEX = "VertexShader.glsl";
+constexpr const char* SHADER_FRAG = "FragShader.glsl";
 
 enum class TranslateMode {NONE, AUTO, DRAGGING};
 

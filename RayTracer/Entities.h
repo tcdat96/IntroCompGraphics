@@ -4,7 +4,7 @@
 
 class Sphere;
 
-const double AIR_COEFFICENT = 1.0002926;
+const double AIR_ETA = 1.0002926;
 
 struct Pixel {
 	int r, g, b;
@@ -46,7 +46,7 @@ struct Light {
 
 struct Refraction {
 	dvec3 color;
-	double eta = AIR_COEFFICENT;
+	double eta = AIR_ETA;
 	Refraction() {}
 	Refraction(dvec3 color, double eta) : color(color), eta(eta) {}
 };

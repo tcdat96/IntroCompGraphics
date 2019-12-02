@@ -8,7 +8,7 @@ vec3 gCamera(0, 0, 1);
 dvec3 gBackground = vec3(0, 0, 0);
 vector<Light> gLights;
 dvec3 gAmbient;
-vector<Refraction*> gRefracted;
+Refraction* gCurEta;
 
 vector<Group> gGroups;
 vector<Sphere*> gSpheres;
@@ -30,13 +30,11 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-	Refraction* scene = new Refraction(vec3(0), AIR_COEFFICENT);
-	gRefracted.push_back(scene);
-
 	if (!gHasMotion) {
 		castRays();
 	} 
 	else {
+		cout << "Scene file has motion. Running " << MOTION_BLUR_ITERATION << " times.\n";
 		for (int i = 0; i < MOTION_BLUR_ITERATION; i++) {
 			castRays();
 			for (auto sphere : gSpheres) {
@@ -58,7 +56,6 @@ int main(int argc, char** argv) {
 
 void castRays() {
 	gProgress = 0;
-
 	auto start = chrono::high_resolution_clock::now();
 	// casting primary rays
 	switch (gMode)
@@ -280,27 +277,35 @@ dvec3 PhongIllumination(const Ray& ray, Surface* surface, const Light& light) {
 	return color * light.color;
 }
 
-dvec3 calcRefraction(const Ray& ray, Surface* surface, Refraction* curRef) {
+dvec3 calcRefraction(const Ray& ray, Surface* surface, Refraction* refraction) {
 	dvec3 color = dvec3(0);
-	bool existed = find(gRefracted.begin(), gRefracted.end(), curRef) != gRefracted.end();
-	if ((existed || !equals(curRef->eta, gRefracted.back()->eta)) && ray.depth < MAX_RAY_DEPTH) {
-		double eta = 0;
-		if (existed) {
-			gRefracted.erase(std::remove(gRefracted.begin(), gRefracted.end(), curRef), gRefracted.end());
-			eta = gRefracted.back()->eta / curRef->eta;
-		}
-		else {
-			eta = curRef->eta / gRefracted.back()->eta;
-			gRefracted.push_back(curRef);
-		}
 
-		dvec3 refractRay = glm::refract(ray.v, surface->normal, eta);
-		if (refractRay != dvec3(0)) {
-			dvec3 u = surface->adjustedHitPoint(existed);
-			Ray refract(u, refractRay, ray.depth + 1);
-			color += 0.2 * trace(refract);
+	if (ray.depth < MAX_RAY_DEPTH) {
+		// going out (same object)
+		if (refraction == gCurEta) {
+			double eta = AIR_ETA / refraction->eta;
+			dvec3 refractRay = glm::refract(ray.v, surface->normal, eta);
+			if (!similar(refractRay, dvec3(0))) {
+				gCurEta = nullptr;
+				dvec3 u = surface->adjustedHitPoint();
+				Ray refract(u, refractRay, ray.depth + 1);
+				color += 0.2 * trace(refract);
+			}
+		}
+		// going in
+		else if (!equals(refraction->eta, AIR_ETA)) {
+			double eta = refraction->eta / AIR_ETA;
+			dvec3 refractRay = glm::refract(ray.v, surface->normal, eta);
+			if (!similar(refractRay, dvec3(0))) {
+				gCurEta = refraction;
+				dvec3 u = surface->adjustedHitPoint(false);
+				Ray refract(u, refractRay, ray.depth + 1);
+				color += 0.2 * trace(refract);
+			}
 		}
 	}
+
+	gCurEta = nullptr;
 	return color;
 }
 
@@ -314,7 +319,6 @@ void printProgress(int i, int j) {
 }
 
 void cleanUp() {
-	delete gRefracted[0];
 	for (auto sphere : gSpheres) {
 		delete sphere;
 	}

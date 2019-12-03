@@ -44,12 +44,10 @@ public:
 
 	void setViewIndex(unsigned int index);
 
-	void setUniformLocations(GLint model, GLint view, GLint ambient, GLint diffuse, GLint specular, GLint shininess) {
+	void setUniformLocations(GLint model, GLint view, GLint ambient, GLint shininess) {
 		Solid::sModelLocation = model;
 		Solid::sViewLocation = view;
 		Solid::sAmbientLocation = ambient;
-		Solid::sDiffuseLocation = diffuse;
-		Solid::sSpecularLocation = specular;
 		Solid::sShininessLocation = shininess;
 	}
 

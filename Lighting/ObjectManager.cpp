@@ -26,7 +26,7 @@ void ObjectManager::generateObjects()
 }
 
 Solid* ObjectManager::generateSphere() {
-	int stacks = 10;
+	int stacks = 20;
 	int slices = stacks;
 	float radius = 6;
 

@@ -49,8 +49,6 @@ public:
 	static GLint sViewLocation;
 	static GLint sModelLocation;
 	static GLint sAmbientLocation;
-	static GLint sDiffuseLocation;
-	static GLint sSpecularLocation;
 	static GLint sShininessLocation;
 
 	Solid() {}

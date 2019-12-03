@@ -9,9 +9,9 @@ uniform vec3 lightPos1, lightPos2, lightPos3;
 uniform vec3 viewPos;
 
 uniform vec3 ambientColor;
-uniform vec3 diffuseColor;
-uniform vec3 specularColor;
 uniform float shininess;
+
+uniform sampler2D surfaceTexture;
 
 vec3 calcLight(vec3 lightPosition) {
 	// diffuse 
@@ -27,7 +27,7 @@ vec3 calcLight(vec3 lightPosition) {
 		specular = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
 	}
 
-	return ambientColor + lambertian * diffuseColor + specular * specularColor;
+	return ambientColor + lambertian + specular;
 }
 
 void main() {
@@ -40,4 +40,10 @@ void main() {
 		color += calcLight(lightPos3);
 	}
 	fragColor = vec4(color, 1.0);
+
+    vec3 norm = normalize(fNormal);
+	vec2 longitudeLatitude = vec2((atan(norm.z, norm.x) / 3.1415926 - 1.0) * 0.5,
+                                  (asin(norm.y) / 3.1415926 + 0.5));
+    vec4 texColor = texture(surfaceTexture, longitudeLatitude);
+	fragColor = fragColor * texColor;
 }

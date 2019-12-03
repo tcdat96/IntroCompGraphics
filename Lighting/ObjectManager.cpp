@@ -19,24 +19,24 @@ ObjectManager::ObjectManager() {
 
 void ObjectManager::generateObjects()
 {
-	PlanetSpec planets[] = {
-		PlanetSpec("textures/sun.jpg", 5, 0),
-		PlanetSpec("textures/mercury.jpg", 1, 8),
-		PlanetSpec("textures/venus.jpg", 1.75, 15),
-		PlanetSpec("textures/earth.jpg", 2, 22),
-		PlanetSpec("textures/mars.jpg", 1.5f, 30),
-		PlanetSpec("textures/jupiter.jpg", 3, 38),
-		PlanetSpec("textures/saturn.jpg", 2.5, 46),
-		PlanetSpec("textures/uranus.jpg", 1.5, 54),
-		PlanetSpec("textures/neptune.jpg", 1.5, 62)
+	PlanetSpec specs[] = {
+		PlanetSpec("textures/sun.jpg", 8, 0, 0, 0, true),
+		PlanetSpec("textures/mercury.jpg", 1, 11, 58.6f, 87.97f),
+		PlanetSpec("textures/venus.jpg", 1.75, 17, 243, 224.7f),
+		PlanetSpec("textures/earth.jpg", 2, 24, 0.99f, 365.26f),
+		PlanetSpec("textures/mars.jpg", 1.5f, 32, 1.03f, 686.2f),
+		PlanetSpec("textures/jupiter.jpg", 4, 40, 0.41f, 4328.9f),
+		PlanetSpec("textures/saturn.jpg", 3, 48, 0.45f, 10752.9f),
+		PlanetSpec("textures/uranus.jpg", 2.5, 56, 0.72f, 30663.65f),
+		PlanetSpec("textures/neptune.jpg", 1.75, 64, 0.67f, 60148.35f)
 	};
-	for (auto specs : planets) {
-		Solid* solid = createPlanet(specs);
+	for (auto spec : specs) {
+		Solid* solid = createPlanet(spec);
 		mObjects.push_back(solid);
 	}
 }
 
-Solid* ObjectManager::createPlanet(PlanetSpec info) {
+Solid* ObjectManager::createPlanet(PlanetSpec spec) {
 	int stacks = 10;
 	int slices = stacks;
 	float radius = 1;
@@ -79,9 +79,9 @@ Solid* ObjectManager::createPlanet(PlanetSpec info) {
 		indices[i] += offset;
 	}
 	
-	int textureId = readTexture(info.texture);
-	Planet* planet = new Planet(indices, textureId);
-	planet->transform(info.xfm);
+	int textureId = readTexture(spec.texture);
+	Planet* planet = new Planet(indices, textureId, spec);
+	planet->transform(spec.xfm);
 	return planet;
 }
 

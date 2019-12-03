@@ -8,10 +8,6 @@ ObjectManager* gObjectManager;
 float gFovy = 45;
 GLint gProjectionLocation;
 
-int gLightCount = 1;
-bool gSunEffect = false;
-GLint gLight1Location, gLight2Location, gLight3Location;
-
 GLint gTextureLocation;
 
 int main(void)
@@ -94,36 +90,11 @@ void setUpData() {
 	gObjectManager = ObjectManager::getInstance();
 	setUpShaders();
 	setUpProjection();
-	setUpLight();
 }
 
 void setUpProjection() {
-	auto projection = glm::perspective(glm::radians(gFovy), 4.0f / 3.0f, 0.1f, 100.0f);
+	auto projection = glm::perspective(glm::radians(gFovy), 4.0f / 3.0f, 0.1f, 1000.0f);
 	glUniformMatrix4fv(gProjectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
-}
-
-void setUpLight() {
-	static float sSunAngle = 0;
-	sSunAngle += 0.005f;
-	if (sSunAngle > M_PI * 2) sSunAngle = 0;
-
-	auto radius = 50.0f;
-	auto cosine = radius * cosf(sSunAngle);
-	auto sine = radius * sinf(sSunAngle);
-
-	auto lightPos = glm::vec3(cosine, 0, sine);
-	glUniform3f(gLight1Location, lightPos[0], lightPos[1], lightPos[2]);
-	gObjectManager->setLightPosition(lightPos[0], lightPos[1], lightPos[2]);
-
-	if (gLightCount >= 2) {
-		auto lightPos2 = glm::vec3(40, -cosine, -sine);
-		glUniform3f(gLight2Location, lightPos2[0], lightPos2[1], lightPos2[2]);
-	}
-
-	if (gLightCount >= 3) {
-		auto lightPos3 = glm::vec3(cosine, sine, -30);
-		glUniform3f(gLight3Location, lightPos3[0], lightPos3[1], lightPos3[2]);
-	}
 }
 
 void setUpShaders() {
@@ -142,9 +113,6 @@ void setUpShaders() {
 	glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
 	gProjectionLocation = getUniformLocation(gVertexProgram, "projection");
-	gLight1Location = getUniformLocation(gVertexProgram, "lightPos1");
-	gLight2Location = getUniformLocation(gVertexProgram, "lightPos2");
-	gLight3Location = getUniformLocation(gVertexProgram, "lightPos3");
 
 	auto viewPosLocation = getUniformLocation(gVertexProgram, "viewPos");
 	glUniform3f(viewPosLocation, CAMERA[0], CAMERA[1], CAMERA[2]);
@@ -152,7 +120,8 @@ void setUpShaders() {
 	gObjectManager->setUniformLocations(
 		getUniformLocation(gVertexProgram, "model"),
 		getUniformLocation(gVertexProgram, "view"),
-		getUniformLocation(gVertexProgram, "surfaceTexture")
+		getUniformLocation(gVertexProgram, "surfaceTexture"),
+		getUniformLocation(gVertexProgram, "lightSource")
 	);
 }
 
@@ -160,10 +129,6 @@ void renderWorld() {
 	glClearColor(0, 0, 0, 1);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	if (gSunEffect) {
-		setUpLight();
-	}
 
 	gObjectManager->render();
 }
@@ -188,14 +153,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			break;
 		case GLFW_KEY_R:
 			gObjectManager->toggleRotation();
-			break;
-		case GLFW_KEY_U:
-			gSunEffect = !gSunEffect;
-			break;
-		case GLFW_KEY_L:
-			gLightCount = gLightCount < 3 ? gLightCount + 1 : 1;
-			glUniform3f(gLight2Location, 0, 0, 0);
-			glUniform3f(gLight3Location, 0, 0, 0);
 			break;
 		case GLFW_KEY_1:
 		case GLFW_KEY_2:

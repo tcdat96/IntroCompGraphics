@@ -3,6 +3,7 @@
 GLint Solid::sModelLocation;
 GLint Solid::sViewLocation;
 GLint Solid::sTextureLocation;
+GLint Solid::sLightSourceLocation;
 
 std::vector<GLfloat> Solid::vPositions;
 unsigned int Solid::sVertexCount = 0;
@@ -96,8 +97,8 @@ void Solid::setUpAttributes(mat4 view, bool rotation)
 }
 
 glm::mat4 Solid::getMatrixModel() {
-	auto model = glm::translate(mat4(1), mXfm.translation);
-	model = glm::scale(model, mXfm.scale);
+	auto model = glm::scale(mat4(1), mXfm.scale);
+	model = glm::translate(model, mXfm.translation);
 	if (mAngle > 0) {
 		model = glm::rotate(model, mAngle, vec3(0, 1, 0));
 	}

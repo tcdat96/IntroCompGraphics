@@ -41,6 +41,7 @@ public:
 	static GLint sViewLocation;
 	static GLint sModelLocation;
 	static GLint sTextureLocation;
+	static GLint sLightSourceLocation;
 
 	Solid() {}
 	Solid(std::vector<unsigned int> indices, int vpf = 3);

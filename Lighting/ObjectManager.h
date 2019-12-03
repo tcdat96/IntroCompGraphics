@@ -6,8 +6,7 @@
 #include "utils.h"
 #include "Planet.h"
 
-constexpr float TRANSLATE_DELTA = 6;
-constexpr glm::vec3 CAMERA = vec3(60, 25, 60);
+constexpr glm::vec3 CAMERA = vec3(70, 25, 70);
 
 class ObjectManager {
 private:
@@ -44,10 +43,11 @@ public:
 
 	void setViewIndex(unsigned int index);
 
-	void setUniformLocations(GLint model, GLint view, GLint texture) {
+	void setUniformLocations(GLint model, GLint view, GLint texture, GLint lightSource) {
 		Solid::sModelLocation = model;
 		Solid::sViewLocation = view;
 		Solid::sTextureLocation = texture;
+		Solid::sLightSourceLocation = lightSource;
 	}
 
 	int readTexture(const char* textureFile);

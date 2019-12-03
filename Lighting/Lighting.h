@@ -26,8 +26,8 @@ using namespace std;
 GLFWwindow* window;
 
 // constant
-constexpr auto SCREEN_WIDTH = 1024;
-constexpr auto SCREEN_HEIGHT = 768;
+constexpr auto SCREEN_WIDTH = 1440;
+constexpr auto SCREEN_HEIGHT = 900;
 
 constexpr const char* SHADER_VERTEX = "VertexShader.glsl";
 constexpr const char* SHADER_FRAG = "FragShader.glsl";
@@ -40,7 +40,6 @@ int main(void);
 int setUpOpenGlComponents();
 void setUpData();
 void setUpProjection();
-void setUpLight();
 void setUpShaders();
 void renderWorld();
 

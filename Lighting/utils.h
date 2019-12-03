@@ -20,7 +20,14 @@ struct Transformation {
 struct PlanetSpec {
 	const char* texture;
 	Transformation xfm;
-	PlanetSpec(const char* texture, float scale, float z) : texture(texture) {
+	
+	float rotation = 0;
+	float revolution = 0;
+	
+	bool isSun = false;
+
+	PlanetSpec(const char* texture, float scale, float z, float rotation, float revolution, bool isSun = false)
+		: texture(texture), rotation(rotation), revolution(revolution), isSun(isSun) {
 		xfm = Transformation(vec3(0, 0, z), vec3(scale));
 	}
 };

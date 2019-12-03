@@ -95,7 +95,6 @@ void setUpData() {
 	setUpShaders();
 	setUpProjection();
 	setUpLight();
-	setUpTexture();
 }
 
 void setUpProjection() {
@@ -127,36 +126,6 @@ void setUpLight() {
 	}
 }
 
-void setUpTexture() {
-	int w;
-	int h;
-	int comp;
-	stbi_set_flip_vertically_on_load(true);
-
-	unsigned char* image = stbi_load("textures\\earth.jpg", &w, &h, &comp, STBI_rgb_alpha);
-	if (image == nullptr) throw(std::string("Failed to load texture"));
-	glActiveTexture(GL_TEXTURE0);
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-	stbi_image_free(image);
-
-	image = stbi_load("textures\\sun.jpg", &w, &h, &comp, STBI_rgb_alpha);
-	if (image == nullptr) throw(std::string("Failed to load texture"));
-	glActiveTexture(GL_TEXTURE1);
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-	stbi_image_free(image);
-
-	glUniform1i(gTextureLocation, 1);
-}
-
 void setUpShaders() {
 	// vertex shader
 	gVertexProgram = initShaders(SHADER_VERTEX, SHADER_FRAG);
@@ -180,11 +149,10 @@ void setUpShaders() {
 	auto viewPosLocation = getUniformLocation(gVertexProgram, "viewPos");
 	glUniform3f(viewPosLocation, CAMERA[0], CAMERA[1], CAMERA[2]);
 
-	gTextureLocation = getUniformLocation(gVertexProgram, "surfaceTexture");
-
 	gObjectManager->setUniformLocations(
 		getUniformLocation(gVertexProgram, "model"),
-		getUniformLocation(gVertexProgram, "view")
+		getUniformLocation(gVertexProgram, "view"),
+		getUniformLocation(gVertexProgram, "surfaceTexture")
 	);
 }
 

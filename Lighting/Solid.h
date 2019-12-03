@@ -24,19 +24,20 @@ protected:
 	glm::vec3 mCamera = glm::vec3(5, 2, 5);
 
 	float mAngle = 0;
-	vec3 mTranslate = vec3(1);
 
 	glm::mat4 mView = glm::mat4(1);
-	
+
+	int mTextureId = -1;
+
 	std::vector<unsigned int> triangulate(std::vector<unsigned int> indices, int vpf);
 
 	virtual void computeNormals();
 	static std::vector<glm::vec3> computeNormals(std::vector<unsigned int> indices);
-	
+
 	void setPointOfInterest(vec3 pointOfInterest = vec3(0));
 
 	virtual void setUpData();
-	void setUpAttributes(mat4 vp, bool rotation);
+	virtual void setUpAttributes(mat4 vp, bool rotation);
 	virtual glm::mat4 getMatrixModel();
 
 public:
@@ -45,6 +46,7 @@ public:
 	static unsigned int sVertexCount;
 	static GLint sViewLocation;
 	static GLint sModelLocation;
+	static GLint sTextureLocation;
 
 	Solid() {}
 	Solid(std::vector<unsigned int> indices, int vpf = 3);
@@ -52,6 +54,10 @@ public:
 
 	std::vector<unsigned int> getIndices() {
 		return mIndices;
+	}
+
+	void setTextureId(int textureId) {
+		mTextureId = textureId;
 	}
 
 	virtual void translate(vec3 translate);

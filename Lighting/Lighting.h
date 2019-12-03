@@ -25,9 +25,6 @@ using namespace std;
 #include <glfw/glfw3.h>
 GLFWwindow* window;
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
-
 // constant
 constexpr auto SCREEN_WIDTH = 1024;
 constexpr auto SCREEN_HEIGHT = 768;
@@ -44,7 +41,6 @@ int setUpOpenGlComponents();
 void setUpData();
 void setUpProjection();
 void setUpLight();
-void setUpTexture();
 void setUpShaders();
 void renderWorld();
 

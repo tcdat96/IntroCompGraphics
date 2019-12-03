@@ -4,7 +4,10 @@
 
 class Sphere : public Solid {
 public:
-	Sphere(std::vector<unsigned int> indices) : Solid(indices) {}
+	Sphere(std::vector<unsigned int> indices, int textureId = -1) : Solid(indices) {
+		mTextureId = textureId;
+	}
+
 private:
 	typedef Solid super;
 
@@ -33,8 +36,8 @@ private:
 		return model;
 	}
 
-	void render(bool rotation) {
+	virtual void setUpAttributes(mat4 vp, bool rotation) {
 		mScale = true;
-		super::render(rotation);
+		super::setUpAttributes(vp, rotation);
 	}
 };

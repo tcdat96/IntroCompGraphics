@@ -2,6 +2,7 @@
 
 GLint Solid::sModelLocation;
 GLint Solid::sViewLocation;
+GLint Solid::sTextureLocation;
 
 std::vector<GLfloat> Solid::vPositions;
 unsigned int Solid::sVertexCount = 0;
@@ -59,14 +60,14 @@ std::vector<glm::vec3> Solid::computeNormals(std::vector<unsigned int> indices)
 
 void Solid::setPointOfInterest(vec3 pointOfInterest)
 {
-	pointOfInterest += mTranslate;
-	mCamera += mTranslate;
+	pointOfInterest += mTranslation;
+	mCamera += mTranslation;
 	glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
 	mView = glm::lookAt(mCamera, pointOfInterest, cameraUp);
 }
 
-void Solid::translate(vec3 translate) {
-	mTranslate = translate;
+void Solid::translate(vec3 translation) {
+	mTranslation = translation;
 	setPointOfInterest();
 }
 
@@ -88,10 +89,14 @@ void Solid::setUpAttributes(mat4 view, bool rotation)
 	auto model = getMatrixModel();
 	glUniformMatrix4fv(sModelLocation, 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(sViewLocation, 1, GL_FALSE, glm::value_ptr(view));
+
+	if (mTextureId >= 0) {
+		glUniform1i(sTextureLocation, mTextureId);
+	}
 }
 
 glm::mat4 Solid::getMatrixModel() {
-	auto model = glm::translate(mat4(1), mTranslate);
+	auto model = glm::translate(mat4(1), mTranslation);
 	if (mAngle > 0) {
 		model = glm::rotate(model, mAngle, vec3(0, 1, 0));
 	}

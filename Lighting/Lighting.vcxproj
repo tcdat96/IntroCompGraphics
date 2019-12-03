@@ -153,6 +153,14 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\earth.jpg" />
+    <Image Include="textures\jupiter.jpg" />
+    <Image Include="textures\mars.jpg" />
+    <Image Include="textures\mercury.jpg" />
+    <Image Include="textures\neptune.jpg" />
+    <Image Include="textures\saturn.jpg" />
+    <Image Include="textures\sun.jpg" />
+    <Image Include="textures\uranus.jpg" />
+    <Image Include="textures\venus.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

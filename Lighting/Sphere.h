@@ -4,9 +4,7 @@
 
 class Sphere : public Solid {
 public:
-	Sphere(std::vector<unsigned int> indices) : Solid(indices) {
-		mMaterial = yRubber;
-	}
+	Sphere(std::vector<unsigned int> indices) : Solid(indices) {}
 private:
 	typedef Solid super;
 

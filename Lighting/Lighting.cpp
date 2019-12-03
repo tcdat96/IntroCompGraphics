@@ -184,9 +184,7 @@ void setUpShaders() {
 
 	gObjectManager->setUniformLocations(
 		getUniformLocation(gVertexProgram, "model"),
-		getUniformLocation(gVertexProgram, "view"),
-		getUniformLocation(gVertexProgram, "ambientColor"),
-		getUniformLocation(gVertexProgram, "shininess")
+		getUniformLocation(gVertexProgram, "view")
 	);
 }
 

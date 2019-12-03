@@ -141,7 +141,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lighting.h" />
-    <ClInclude Include="Material.h" />
     <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="shaderUtils.h" />
     <ClInclude Include="Solid.h" />

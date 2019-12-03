@@ -2,8 +2,6 @@
 
 GLint Solid::sModelLocation;
 GLint Solid::sViewLocation;
-GLint Solid::sAmbientLocation;
-GLint Solid::sShininessLocation;
 
 std::vector<GLfloat> Solid::vPositions;
 unsigned int Solid::sVertexCount = 0;
@@ -90,11 +88,6 @@ void Solid::setUpAttributes(mat4 view, bool rotation)
 	auto model = getMatrixModel();
 	glUniformMatrix4fv(sModelLocation, 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(sViewLocation, 1, GL_FALSE, glm::value_ptr(view));
-
-	glm::vec3 ambient = mMaterial.ambient;
-	glUniform3f(sAmbientLocation, ambient[0], ambient[1], ambient[2]);
-
-	glUniform1f(sShininessLocation, mMaterial.shininess);
 }
 
 glm::mat4 Solid::getMatrixModel() {

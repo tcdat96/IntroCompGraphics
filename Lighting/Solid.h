@@ -5,7 +5,6 @@
 #include <iostream>
 #include <vector>
 #include "utils.h"
-#include "Material.h"
 
 // Include GLM
 #include <glm/glm.hpp>
@@ -27,8 +26,6 @@ protected:
 	float mAngle = 0;
 	vec3 mTranslate = vec3(1);
 
-	Material mMaterial;
-
 	glm::mat4 mView = glm::mat4(1);
 	
 	std::vector<unsigned int> triangulate(std::vector<unsigned int> indices, int vpf);
@@ -48,9 +45,6 @@ public:
 	static unsigned int sVertexCount;
 	static GLint sViewLocation;
 	static GLint sModelLocation;
-	static GLint sAmbientLocation;
-
-	static GLint sShininessLocation;
 
 	Solid() {}
 	Solid(std::vector<unsigned int> indices, int vpf = 3);
@@ -61,10 +55,6 @@ public:
 	}
 
 	virtual void translate(vec3 translate);
-
-	void setMaterial(Material material) {
-		mMaterial = material;
-	}
 
 	virtual void render(bool rotation);
 	virtual void render(mat4 vp, bool rotation);

@@ -17,7 +17,6 @@ private:
 	GLuint mVBO;
 	GLfloat mLight[18];
 
-	int mViewIndex = 1;
 	bool mIsSolid = true;
 	bool mRotation = false;
 
@@ -40,8 +39,6 @@ public:
 		static ObjectManager instance;
 		return &instance;
 	}
-
-	void setViewIndex(unsigned int index);
 
 	void setUniformLocations(GLint model, GLint view, GLint texture, GLint lightSource) {
 		Solid::sModelLocation = model;

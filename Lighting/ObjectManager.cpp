@@ -127,23 +127,12 @@ void ObjectManager::setLightPosition(float x, float y, float z) {
 	}
 }
 
-void ObjectManager::setViewIndex(unsigned int index) {
-	if (index > 0 && index <= mObjects.size() + 1 && index != mViewIndex) {
-		mViewIndex = index;
-	}
-}
-
 void ObjectManager::render() {
-	if (mViewIndex > 1) {
-		mObjects[mViewIndex - 2]->render(mRotation);
-	}
-	else {
-		// debugging
-		glUniformMatrix4fv(Solid::sViewLocation, 1, GL_FALSE, glm::value_ptr(sView));
-		glUniformMatrix4fv(Solid::sModelLocation, 1, GL_FALSE, glm::value_ptr(mat4(1)));
+	// debugging
+	glUniformMatrix4fv(Solid::sViewLocation, 1, GL_FALSE, glm::value_ptr(sView));
+	glUniformMatrix4fv(Solid::sModelLocation, 1, GL_FALSE, glm::value_ptr(mat4(1)));
 
-		for (auto it = mObjects.begin(); it != mObjects.end(); it++) {
-			(*it)->render(sView, mRotation);
-		}
+	for (auto it = mObjects.begin(); it != mObjects.end(); it++) {
+		(*it)->render(sView, mRotation);
 	}
 }

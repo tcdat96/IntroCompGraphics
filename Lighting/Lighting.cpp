@@ -154,16 +154,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		case GLFW_KEY_R:
 			gObjectManager->toggleRotation();
 			break;
-		case GLFW_KEY_1:
-		case GLFW_KEY_2:
-		case GLFW_KEY_3:
-		case GLFW_KEY_4:
-		case GLFW_KEY_5:
-		case GLFW_KEY_6:
-		case GLFW_KEY_7:
-		case GLFW_KEY_8:
-			gObjectManager->setViewIndex(key - GLFW_KEY_0);
-			break;
 		}
 	}
 }

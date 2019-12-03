@@ -60,14 +60,14 @@ std::vector<glm::vec3> Solid::computeNormals(std::vector<unsigned int> indices)
 
 void Solid::setPointOfInterest(vec3 pointOfInterest)
 {
-	pointOfInterest += mTranslation;
-	mCamera += mTranslation;
+	pointOfInterest += mXfm.translation;
+	mCamera += mXfm.translation;
 	glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
 	mView = glm::lookAt(mCamera, pointOfInterest, cameraUp);
 }
 
-void Solid::translate(vec3 translation) {
-	mTranslation = translation;
+void Solid::transform(Transformation xfm) {
+	mXfm = xfm;
 	setPointOfInterest();
 }
 
@@ -96,7 +96,8 @@ void Solid::setUpAttributes(mat4 view, bool rotation)
 }
 
 glm::mat4 Solid::getMatrixModel() {
-	auto model = glm::translate(mat4(1), mTranslation);
+	auto model = glm::translate(mat4(1), mXfm.translation);
+	model = glm::scale(model, mXfm.scale);
 	if (mAngle > 0) {
 		model = glm::rotate(model, mAngle, vec3(0, 1, 0));
 	}

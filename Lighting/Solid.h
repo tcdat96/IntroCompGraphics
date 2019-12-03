@@ -6,13 +6,6 @@
 #include <vector>
 #include "utils.h"
 
-// Include GLM
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/string_cast.hpp>
-using namespace glm;
-
 #include <glew/glew.h>
 
 class Solid {
@@ -24,6 +17,7 @@ protected:
 	glm::vec3 mCamera = glm::vec3(5, 2, 5);
 
 	float mAngle = 0;
+	Transformation mXfm;
 
 	glm::mat4 mView = glm::mat4(1);
 
@@ -60,7 +54,7 @@ public:
 		mTextureId = textureId;
 	}
 
-	virtual void translate(vec3 translate);
+	void transform(Transformation xfm);
 
 	virtual void render(bool rotation);
 	virtual void render(mat4 vp, bool rotation);

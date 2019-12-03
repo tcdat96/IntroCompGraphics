@@ -8,7 +8,7 @@ in vec3 fPosition;
 uniform vec3 lightPos1, lightPos2, lightPos3;
 uniform vec3 viewPos;
 
-const float ambientColor = 0.1;
+const float ambientColor = 0.25;
 const float shininess = 32;
 
 uniform sampler2D surfaceTexture;

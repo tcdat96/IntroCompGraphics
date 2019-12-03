@@ -19,33 +19,27 @@ ObjectManager::ObjectManager() {
 
 void ObjectManager::generateObjects()
 {
-	const char* textures[] = {
-		"textures/sun.jpg",
-		"textures/mercury.jpg",
-		"textures/venus.jpg",
-		"textures/earth.jpg",
-		"textures/mars.jpg",
-		"textures/jupiter.jpg",
-		"textures/saturn.jpg",
-		"textures/uranus.jpg",
-		"textures/neptune.jpg"
+	PlanetSpec planets[] = {
+		PlanetSpec("textures/sun.jpg", 5, 0),
+		PlanetSpec("textures/mercury.jpg", 1, 8),
+		PlanetSpec("textures/venus.jpg", 1.75, 15),
+		PlanetSpec("textures/earth.jpg", 2, 22),
+		PlanetSpec("textures/mars.jpg", 1.5f, 30),
+		PlanetSpec("textures/jupiter.jpg", 3, 38),
+		PlanetSpec("textures/saturn.jpg", 2.5, 46),
+		PlanetSpec("textures/uranus.jpg", 1.5, 54),
+		PlanetSpec("textures/neptune.jpg", 1.5, 62)
 	};
-	for (auto texture : textures) {
-		Solid* solid = generateSphere(texture);
+	for (auto specs : planets) {
+		Solid* solid = createPlanet(specs);
 		mObjects.push_back(solid);
-	}
-
-	for (int i = 1; i < mObjects.size(); i++) {
-		auto translation = vec3(0, 0, TRANSLATE_DELTA * i);
-		std::cout << glm::to_string(translation) << std::endl;
-		mObjects[i]->translate(translation);
 	}
 }
 
-Solid* ObjectManager::generateSphere(const char* texture) {
+Solid* ObjectManager::createPlanet(PlanetSpec info) {
 	int stacks = 10;
 	int slices = stacks;
-	float radius = 6;
+	float radius = 1;
 
 	int offset = (Solid::vPositions.size()) / 3;
 
@@ -85,8 +79,10 @@ Solid* ObjectManager::generateSphere(const char* texture) {
 		indices[i] += offset;
 	}
 	
-	int textureId = readTexture(texture);
-	return new Sphere(indices, textureId);
+	int textureId = readTexture(info.texture);
+	Planet* planet = new Planet(indices, textureId);
+	planet->transform(info.xfm);
+	return planet;
 }
 
 int ObjectManager::readTexture(const char* textureFile) {

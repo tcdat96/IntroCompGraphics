@@ -4,10 +4,10 @@
 #include <set>
 
 #include "utils.h"
-#include "Sphere.h"
+#include "Planet.h"
 
 constexpr float TRANSLATE_DELTA = 6;
-constexpr glm::vec3 CAMERA = vec3(50, 40, 50);
+constexpr glm::vec3 CAMERA = vec3(60, 25, 60);
 
 class ObjectManager {
 private:
@@ -31,7 +31,7 @@ private:
 	}
 
 	void generateObjects();
-	Solid* generateSphere(const char* texture);
+	Solid* createPlanet(PlanetSpec info);
 
 public:
 	int mVertexCount = 0;

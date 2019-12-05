@@ -4,7 +4,7 @@
 #include <set>
 
 #include "utils.h"
-#include "Planet.h"
+#include "Satellite.h"
 
 constexpr glm::vec3 CAMERA = vec3(70, 25, 70);
 
@@ -29,7 +29,9 @@ private:
 	}
 
 	void generateObjects();
-	Solid* createPlanet(PlanetSpec info);
+	Solid* createPlanet(PlanetSpec spec);
+	Solid* createSatellite(PlanetSpec satellite, PlanetSpec center);
+	std::vector<unsigned int> createSphere();
 
 public:
 	int mVertexCount = 0;

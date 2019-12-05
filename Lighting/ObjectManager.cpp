@@ -6,8 +6,6 @@
 glm::mat4 ObjectManager::sView = glm::lookAt(CAMERA, vec3(0), vec3(0, 1, 0));
 
 ObjectManager::ObjectManager() {
-	float phi = (1 + (float)sqrt(5)) / 2;
-	float iphi = 1.0f / phi;
 	Solid::vPositions = {};
 
 	generateObjects();
@@ -27,16 +25,35 @@ void ObjectManager::generateObjects()
 		PlanetSpec("textures/mars.jpg", 1.5f, 32, 1.03f, 686.2f),
 		PlanetSpec("textures/jupiter.jpg", 4, 40, 0.41f, 4328.9f),
 		PlanetSpec("textures/saturn.jpg", 3, 48, 0.45f, 10752.9f),
-		PlanetSpec("textures/uranus.jpg", 2.5, 56, 0.72f, 30663.65f),
-		PlanetSpec("textures/neptune.jpg", 1.75, 64, 0.67f, 60148.35f)
+		PlanetSpec("textures/uranus.jpg", 2.5, 56, 0.72f, 30663.65f)
+		
 	};
 	for (auto spec : specs) {
 		Solid* solid = createPlanet(spec);
 		mObjects.push_back(solid);
 	}
+
+	PlanetSpec moonSpec = PlanetSpec("textures/moon.jpg", 0.5, 24, 27, 27.322f);
+	mObjects.push_back(createSatellite(moonSpec, specs[3]));
 }
 
 Solid* ObjectManager::createPlanet(PlanetSpec spec) {
+	auto indices = createSphere();
+	int textureId = readTexture(spec.texture);
+	Planet* planet = new Planet(indices, textureId, spec);
+	planet->transform(spec.xfm);
+	return planet;
+}
+
+Solid* ObjectManager::createSatellite(PlanetSpec satSpec, PlanetSpec center) {
+	auto indices = createSphere();
+	int textureId = readTexture(satSpec.texture);
+	Satellite* satellite = new Satellite(indices, textureId, satSpec, center);
+	satellite->transform(satSpec.xfm);
+	return satellite;
+}
+
+std::vector<unsigned int> ObjectManager::createSphere() {
 	int stacks = 10;
 	int slices = stacks;
 	float radius = 1;
@@ -78,11 +95,8 @@ Solid* ObjectManager::createPlanet(PlanetSpec spec) {
 	for (unsigned int i = 0; i < indices.size(); i++) {
 		indices[i] += offset;
 	}
-	
-	int textureId = readTexture(spec.texture);
-	Planet* planet = new Planet(indices, textureId, spec);
-	planet->transform(spec.xfm);
-	return planet;
+
+	return indices;
 }
 
 int ObjectManager::readTexture(const char* textureFile) {
@@ -132,7 +146,11 @@ void ObjectManager::render() {
 	glUniformMatrix4fv(Solid::sViewLocation, 1, GL_FALSE, glm::value_ptr(sView));
 	glUniformMatrix4fv(Solid::sModelLocation, 1, GL_FALSE, glm::value_ptr(mat4(1)));
 
-	for (auto it = mObjects.begin(); it != mObjects.end(); it++) {
-		(*it)->render(sView, mRotation);
+	//for (auto it = mObjects.begin(); it != mObjects.end(); it++) {
+	//	(*it)->render(sView, mRotation);
+	//}
+
+	for (unsigned int i = 0; i < mObjects.size(); i++) {
+		mObjects[i]->render(sView, mRotation);
 	}
 }

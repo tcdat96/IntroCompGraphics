@@ -36,6 +36,9 @@
     <ClCompile Include="Lighting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Planet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ObjectManager.h">
@@ -54,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Planet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Satellite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -91,6 +97,9 @@
       <Filter>Source Files\textures</Filter>
     </Image>
     <Image Include="textures\venus.jpg">
+      <Filter>Source Files\textures</Filter>
+    </Image>
+    <Image Include="textures\moon.jpg">
       <Filter>Source Files\textures</Filter>
     </Image>
   </ItemGroup>

@@ -135,12 +135,14 @@
   <ItemGroup>
     <ClCompile Include="Lighting.cpp" />
     <ClCompile Include="ObjectManager.cpp" />
+    <ClCompile Include="Planet.cpp" />
     <ClCompile Include="shaderUtils.cpp" />
     <ClCompile Include="Solid.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lighting.h" />
+    <ClInclude Include="Satellite.h" />
     <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="shaderUtils.h" />
     <ClInclude Include="Solid.h" />
@@ -156,6 +158,7 @@
     <Image Include="textures\jupiter.jpg" />
     <Image Include="textures\mars.jpg" />
     <Image Include="textures\mercury.jpg" />
+    <Image Include="textures\moon.jpg" />
     <Image Include="textures\neptune.jpg" />
     <Image Include="textures\saturn.jpg" />
     <Image Include="textures\sun.jpg" />

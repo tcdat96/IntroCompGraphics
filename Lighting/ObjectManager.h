@@ -13,11 +13,11 @@ private:
 	static glm::mat4 sView;
 
 	std::vector<Solid*> mObjects;
+	std::vector<unsigned int> mSphereIndices;
 
 	GLuint mVBO;
 	GLfloat mLight[18];
 
-	bool mIsSolid = true;
 	bool mRotation = false;
 
 	ObjectManager();
@@ -31,7 +31,8 @@ private:
 	void generateObjects();
 	Solid* createPlanet(PlanetSpec spec);
 	Solid* createSatellite(PlanetSpec satellite, PlanetSpec center);
-	std::vector<unsigned int> createSphere();
+	void initSphere();
+	std::vector<unsigned int> getSphere();
 
 public:
 	int mVertexCount = 0;

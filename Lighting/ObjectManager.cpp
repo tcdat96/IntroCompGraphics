@@ -8,11 +8,13 @@ glm::mat4 ObjectManager::sView = glm::lookAt(CAMERA, vec3(0), vec3(0, 1, 0));
 ObjectManager::ObjectManager() {
 	Solid::vPositions = {};
 
+	initSphere();
+
 	generateObjects();
 
 	glGenBuffers(1, &mVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	glBufferData(GL_ARRAY_BUFFER, 100000 * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, Solid::vPositions.size() * 16 * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
 }
 
 void ObjectManager::generateObjects()
@@ -38,7 +40,7 @@ void ObjectManager::generateObjects()
 }
 
 Solid* ObjectManager::createPlanet(PlanetSpec spec) {
-	auto indices = createSphere();
+	auto indices = getSphere();
 	int textureId = readTexture(spec.texture);
 	Planet* planet = new Planet(indices, textureId, spec);
 	planet->transform(spec.xfm);
@@ -46,14 +48,14 @@ Solid* ObjectManager::createPlanet(PlanetSpec spec) {
 }
 
 Solid* ObjectManager::createSatellite(PlanetSpec satSpec, PlanetSpec center) {
-	auto indices = createSphere();
+	auto indices = getSphere();
 	int textureId = readTexture(satSpec.texture);
 	Satellite* satellite = new Satellite(indices, textureId, satSpec, center);
 	satellite->transform(satSpec.xfm);
 	return satellite;
 }
 
-std::vector<unsigned int> ObjectManager::createSphere() {
+void ObjectManager::initSphere() {
 	int stacks = 10;
 	int slices = stacks;
 	float radius = 1;
@@ -81,23 +83,21 @@ std::vector<unsigned int> ObjectManager::createSphere() {
 		}
 	}
 
-	std::vector<unsigned int> indices;
 	for (int i = 0; i < slices * stacks + slices; ++i) {
-		indices.push_back(i);
-		indices.push_back(i + slices + 1);
-		indices.push_back(i + slices);
+		mSphereIndices.push_back(i);
+		mSphereIndices.push_back(i + slices + 1);
+		mSphereIndices.push_back(i + slices);
 
-		indices.push_back(i + slices + 1);
-		indices.push_back(i);
-		indices.push_back(i + 1);
+		mSphereIndices.push_back(i + slices + 1);
+		mSphereIndices.push_back(i);
+		mSphereIndices.push_back(i + 1);
 	}
-
-	for (unsigned int i = 0; i < indices.size(); i++) {
-		indices[i] += offset;
-	}
-
-	return indices;
 }
+
+std::vector<unsigned int> ObjectManager::getSphere() {
+	return mSphereIndices;
+}
+
 
 int ObjectManager::readTexture(const char* textureFile) {
 	int w;

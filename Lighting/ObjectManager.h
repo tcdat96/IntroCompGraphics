@@ -15,6 +15,8 @@ private:
 	std::vector<Solid*> mObjects;
 	std::vector<unsigned int> mSphereIndices;
 
+	std::vector<vec3> mParticles;
+
 	GLuint mVBO;
 	GLfloat mLight[18];
 

@@ -10,6 +10,13 @@ ObjectManager::ObjectManager() {
 
 	initSphere();
 
+	//auto indices = getSphere();
+	//for (auto it = indices.begin(); it != indices.end(); it++) {
+	//	unsigned int index = *it;
+	//	mParticles.push_back(vec3(Solid::vPositions[index] + rand(), 
+	//		Solid::vPositions[index] + rand(), Solid::vPositions[index] + rand()));
+	//}
+
 	generateObjects();
 
 	glGenBuffers(1, &mVBO);
@@ -146,11 +153,7 @@ void ObjectManager::render() {
 	glUniformMatrix4fv(Solid::sViewLocation, 1, GL_FALSE, glm::value_ptr(sView));
 	glUniformMatrix4fv(Solid::sModelLocation, 1, GL_FALSE, glm::value_ptr(mat4(1)));
 
-	//for (auto it = mObjects.begin(); it != mObjects.end(); it++) {
-	//	(*it)->render(sView, mRotation);
-	//}
-
-	for (unsigned int i = 0; i < mObjects.size(); i++) {
-		mObjects[i]->render(sView, mRotation);
+	for (auto it = mObjects.begin(); it != mObjects.end(); it++) {
+		(*it)->render(sView, mRotation);
 	}
 }

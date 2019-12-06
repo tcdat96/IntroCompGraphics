@@ -5,13 +5,22 @@
 
 #include "Solid.h"
 
-#define ROTATE_RATE 5.0f
-
 class Planet : public Solid {
 public:
 	Planet(std::vector<unsigned int> indices, int textureId, PlanetSpec spec);
 
+	void static updateRotationSpeed(bool faster) {
+		sRotateSpeed *= faster ? 2 : 0.5f;
+		sRotateSpeed = clamp(0.05, 50, sRotateSpeed);
+	}
+
+	virtual void updateRotationSpeed();
+
 protected:
+	static float sRotateSpeed;
+
+	PlanetSpec mSpec;
+
 	float mRotation = 0, mRotationAngle = 0;
 	float mRevolution = 0, mRevolutionAngle = 0;
 	bool mIsSun = false;

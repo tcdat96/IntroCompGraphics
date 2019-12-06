@@ -10,6 +10,9 @@ GLint gProjectionLocation;
 
 GLint gTextureLocation;
 
+bool gClicked = false;
+double gStartX, gStartY;
+
 int main(void)
 {
 	if (setUpOpenGlComponents() == -1) {
@@ -65,6 +68,7 @@ int setUpOpenGlComponents() {
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetScrollCallback(window, scrollCallback);
+	glfwSetMouseButtonCallback(window, mouseCallback);
 
 	glewExperimental = GL_TRUE;
 	// GLEW
@@ -97,6 +101,11 @@ void setUpProjection() {
 	glUniformMatrix4fv(gProjectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
+void updateCamera() {
+	auto viewPosLocation = getUniformLocation(gVertexProgram, "viewPos");
+	glUniform3f(viewPosLocation, ObjectManager::sCamera[0], ObjectManager::sCamera[1], ObjectManager::sCamera[2]);
+}
+
 void setUpShaders() {
 	// vertex shader
 	gVertexProgram = initShaders(SHADER_VERTEX, SHADER_FRAG);
@@ -114,8 +123,7 @@ void setUpShaders() {
 
 	gProjectionLocation = getUniformLocation(gVertexProgram, "projection");
 
-	auto viewPosLocation = getUniformLocation(gVertexProgram, "viewPos");
-	glUniform3f(viewPosLocation, CAMERA[0], CAMERA[1], CAMERA[2]);
+	updateCamera();
 
 	gObjectManager->setUniformLocations(
 		getUniformLocation(gVertexProgram, "model"),
@@ -125,10 +133,13 @@ void setUpShaders() {
 	);
 }
 
+
 void renderWorld() { 
 	glClearColor(0, 0, 0, 1);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	updateCamera();
 
 	gObjectManager->render();
 }
@@ -140,9 +151,14 @@ void getCursorPos(double& x, double& y) {
 	y = -(y * 2 - SCREEN_HEIGHT) / SCREEN_HEIGHT;
 }
 
+bool isKeyPressed(int key) {
+	return glfwGetKey(window, key) == GLFW_PRESS;
+}
+
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (action == GLFW_PRESS) {
+	switch (action) {
+	case GLFW_PRESS: {
 		switch (key) {
 		case GLFW_KEY_S:
 			glUseProgram(gVertexProgram);
@@ -154,7 +170,33 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		case GLFW_KEY_R:
 			gObjectManager->toggleRotation();
 			break;
+		case GLFW_KEY_EQUAL:
+			gObjectManager->updateRotationSpeed(true);
+			break;
+		case GLFW_KEY_MINUS:
+			gObjectManager->updateRotationSpeed(false);
+			break;
 		}
+		break;
+	}
+	case GLFW_REPEAT:
+		switch (key) {
+		case GLFW_KEY_UP:
+			gObjectManager->moveCameraVert(true);
+			break;
+		case GLFW_KEY_DOWN:
+			gObjectManager->moveCameraVert(false);
+			break;
+		case GLFW_KEY_LEFT:
+			gObjectManager->moveCameraHoriz(true);
+			break;
+		case GLFW_KEY_RIGHT:
+			gObjectManager->moveCameraHoriz(false);
+			break;
+		}
+		break;
+	case GLFW_RELEASE:
+		break;
 	}
 }
 
@@ -162,7 +204,24 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	gFovy -= yoffset * 2;
 	if (gFovy > 60) gFovy = 60;
 	if (gFovy < 30) gFovy = 30;
-	if (gFovy < 60 && gFovy > 30) {
 		setUpProjection();
+}
+
+void mouseCallback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT)
+	{
+		switch (action) {
+		case GLFW_PRESS: {
+			gClicked = true;
+			getCursorPos(gStartX, gStartY);
+			break;
+		}
+		default:
+		case GLFW_RELEASE: {
+			gClicked = false;
+			break;
+		}
+		}
 	}
 }

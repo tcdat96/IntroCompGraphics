@@ -46,3 +46,11 @@ bool inTriangle(float x1, float y1, float x2, float y2, float x3, float y3, floa
 
 	return !(has_neg && has_pos);
 }
+
+bool equals(float a, float b) {
+	return fabs(a - b) < 0.0000001;
+}
+
+float clamp(float minBound, float maxBound, float value) {
+	return std::max(minBound, std::min(maxBound, value));
+}

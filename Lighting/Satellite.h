@@ -4,14 +4,23 @@
 
 class Satellite : public Planet {
 private:
+	typedef Planet super;
+
+	float mCenterRev = 0;
 	float mCenterRevAngle = 0;
 	float mCenterRevRate;
 	float mDistance;
 public:
 	Satellite(std::vector<unsigned int> indices, int textureId, PlanetSpec satSpec, PlanetSpec center) :
 		Planet(indices, textureId, satSpec) {
-			mCenterRevRate = ROTATE_RATE / center.revolution;
-			mDistance = center.xfm.scale.x + 1;
+		mCenterRev = center.revolution;
+		mCenterRevRate = sRotateSpeed / center.revolution;
+		mDistance = center.xfm.scale.x + 1;
+	}
+
+	virtual void updateRotationSpeed() {
+		super::updateRotationSpeed();
+		mCenterRevRate = sRotateSpeed / mCenterRev;
 	}
 
 	virtual glm::mat4 getMatrixModel() override {

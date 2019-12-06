@@ -2,11 +2,18 @@
 
 #include "Planet.h"
 
+float Planet::sRotateSpeed = 0.5f;
+
 Planet::Planet(std::vector<unsigned int> indices, int textureId, PlanetSpec spec) : Solid(indices) {
 	mTextureId = textureId;
 	mIsSun = spec.isSun;
-	mRotation = spec.rotation > 0 ? ROTATE_RATE / spec.rotation / 10 : -1;
-	mRevolution = spec.revolution > 0 ? ROTATE_RATE / spec.revolution : -1;
+	mSpec = spec;
+	updateRotationSpeed();
+}
+
+void Planet::updateRotationSpeed() {
+	mRotation = mSpec.rotation > 0 ? sRotateSpeed / mSpec.rotation / 10 : -1;
+	mRevolution = mSpec.revolution > 0 ? sRotateSpeed / mSpec.revolution : -1;
 }
 
 glm::mat4 Planet::getMatrixModel() {

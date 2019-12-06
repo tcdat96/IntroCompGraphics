@@ -3,10 +3,14 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-glm::mat4 ObjectManager::sView = glm::lookAt(CAMERA, vec3(0), vec3(0, 1, 0));
+glm::vec3 ObjectManager::sCamera = vec3(70, 25, 70);
+glm::mat4 ObjectManager::sView = glm::lookAt(sCamera, vec3(0), vec3(0, 1, 0));
 
 ObjectManager::ObjectManager() {
 	Solid::vPositions = {};
+
+	moveCameraVert(true);
+	moveCameraHoriz(true);
 
 	initSphere();
 
@@ -63,7 +67,7 @@ Solid* ObjectManager::createSatellite(PlanetSpec satSpec, PlanetSpec center) {
 }
 
 void ObjectManager::initSphere() {
-	int stacks = 10;
+	int stacks = 8;
 	int slices = stacks;
 	float radius = 1;
 
@@ -103,6 +107,33 @@ void ObjectManager::initSphere() {
 
 std::vector<unsigned int> ObjectManager::getSphere() {
 	return mSphereIndices;
+}
+
+void ObjectManager::moveCameraVert(bool up) {
+	float newY = sCamera.y + (up ? 2 : -2);
+	std::cout << newY << "\n";
+	if (abs(newY) < 100) {
+		sCamera.y = newY;
+		updateViewMatrix();
+	}
+}
+
+
+void ObjectManager::moveCameraHoriz(bool left) {
+	mCameraAngle += left ? 0.05 : -0.05;
+	sCamera.x = CAMERA_RADIUS * sin(mCameraAngle);
+	sCamera.z = CAMERA_RADIUS * cos(mCameraAngle);
+	updateViewMatrix();
+}
+
+void ObjectManager::updateRotationSpeed(bool faster)
+{
+	Planet::updateRotationSpeed(faster);
+	for (auto it = mObjects.begin(); it != mObjects.end(); it++) {
+		if (Planet* planet = dynamic_cast<Planet*>(*it)) {
+			planet->updateRotationSpeed();
+		}
+	}
 }
 
 

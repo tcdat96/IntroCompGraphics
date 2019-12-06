@@ -133,7 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Lighting.cpp" />
+    <ClCompile Include="SolarSystem.cpp" />
     <ClCompile Include="ObjectManager.cpp" />
     <ClCompile Include="Planet.cpp" />
     <ClCompile Include="shaderUtils.cpp" />
@@ -141,7 +141,7 @@
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Lighting.h" />
+    <ClInclude Include="SolarSystem.h" />
     <ClInclude Include="Satellite.h" />
     <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="shaderUtils.h" />

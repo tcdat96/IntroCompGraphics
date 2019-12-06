@@ -11,7 +11,7 @@ public:
 
 	void static updateRotationSpeed(bool faster) {
 		sRotateSpeed *= faster ? 2 : 0.5f;
-		sRotateSpeed = clamp(0.05, 50, sRotateSpeed);
+		sRotateSpeed = clamp(0.05, 100, sRotateSpeed);
 	}
 
 	virtual void updateRotationSpeed();

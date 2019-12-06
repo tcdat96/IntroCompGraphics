@@ -12,7 +12,7 @@ Planet::Planet(std::vector<unsigned int> indices, int textureId, PlanetSpec spec
 }
 
 void Planet::updateRotationSpeed() {
-	mRotation = mSpec.rotation > 0 ? sRotateSpeed / mSpec.rotation / 10 : -1;
+	mRotation = mSpec.rotation > 0 ? sRotateSpeed / mSpec.rotation : -1;
 	mRevolution = mSpec.revolution > 0 ? sRotateSpeed / mSpec.revolution : -1;
 }
 

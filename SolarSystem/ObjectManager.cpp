@@ -111,7 +111,6 @@ std::vector<unsigned int> ObjectManager::getSphere() {
 
 void ObjectManager::moveCameraVert(bool up) {
 	float newY = sCamera.y + (up ? 2 : -2);
-	std::cout << newY << "\n";
 	if (abs(newY) < 100) {
 		sCamera.y = newY;
 		updateViewMatrix();

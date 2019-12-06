@@ -1,4 +1,4 @@
-#include "Lighting.h"
+#include "SolarSystem.h"
 
 GLuint VAO = 0;
 GLuint gVertexProgram, gWireframeProgram;
@@ -9,9 +9,6 @@ float gFovy = 45;
 GLint gProjectionLocation;
 
 GLint gTextureLocation;
-
-bool gClicked = false;
-double gStartX, gStartY;
 
 int main(void)
 {
@@ -56,7 +53,7 @@ int setUpOpenGlComponents() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Buffer Transformation", NULL, NULL);
+	window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Solar system", NULL, NULL);
 	if (window == NULL) {
 		fprintf(stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n");
 		glfwTerminate();
@@ -151,10 +148,6 @@ void getCursorPos(double& x, double& y) {
 	y = -(y * 2 - SCREEN_HEIGHT) / SCREEN_HEIGHT;
 }
 
-bool isKeyPressed(int key) {
-	return glfwGetKey(window, key) == GLFW_PRESS;
-}
-
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	switch (action) {
@@ -201,10 +194,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 }
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-	gFovy -= yoffset * 2;
-	if (gFovy > 60) gFovy = 60;
-	if (gFovy < 30) gFovy = 30;
-		setUpProjection();
+	gFovy = clamp(15, 90, gFovy - yoffset * 2);
+	setUpProjection();
 }
 
 void mouseCallback(GLFWwindow* window, int button, int action, int mods)
@@ -213,13 +204,10 @@ void mouseCallback(GLFWwindow* window, int button, int action, int mods)
 	{
 		switch (action) {
 		case GLFW_PRESS: {
-			gClicked = true;
-			getCursorPos(gStartX, gStartY);
 			break;
 		}
 		default:
 		case GLFW_RELEASE: {
-			gClicked = false;
 			break;
 		}
 		}
